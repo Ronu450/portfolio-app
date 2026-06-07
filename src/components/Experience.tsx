@@ -88,11 +88,10 @@ export function Experience() {
                 {/* Timeline dot */}
                 <div className="absolute left-0 top-1 w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ring-4 ring-background">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      exp.isCurrent
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${exp.isCurrent
                         ? "bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/50"
                         : "bg-primary/60"
-                    }`}
+                      }`}
                   >
                     <Briefcase className="w-4 h-4 text-white" />
                   </div>

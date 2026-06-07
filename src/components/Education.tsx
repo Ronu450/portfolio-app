@@ -74,7 +74,7 @@ export function Education() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        
+
         {/* Education Section */}
         <div className="mb-20">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
