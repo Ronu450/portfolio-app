@@ -1,4 +1,4 @@
-import { Briefcase } from "lucide-react";
+import { Briefcase, Calendar, MapPin, Terminal } from "lucide-react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 
@@ -69,90 +69,128 @@ export function Experience() {
   ];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-black">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header */}
         <div className="mb-16">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
-            Work Experience
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-3">
+            Professional Journey
           </h2>
+          <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
+            A timeline of engineering impactful, scalable software solutions across global enterprise platforms and cloud architectures.
+          </p>
+        </div>
+
+        {/* Industry Experience Highlights Dashboard */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+          {[
+            { label: "Years in Industry", val: "2+ Yrs", desc: "Enterprise Engineering", color: "from-primary/20 to-primary/5 border-primary/30" },
+            { label: "Global Enterprise", val: "BofA", desc: "Bank of America", color: "from-accent/20 to-accent/5 border-accent/30" },
+            { label: "Systems Engineer", val: "Infosys", desc: "Cloud & Data Pipelines", color: "from-secondary/20 to-secondary/5 border-secondary/30" },
+            { label: "Core Stack", val: "Java/Py", desc: "Full Stack & DevOps", color: "from-primary/20 to-secondary/5 border-primary/30" }
+          ].map((stat, i) => (
+            <div 
+              key={i} 
+              className={`p-5 rounded-2xl bg-gradient-to-br ${stat.color} border border-white/10 backdrop-blur-md hover:scale-[1.02] transition-transform duration-300 flex flex-col justify-between`}
+            >
+              <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">{stat.label}</span>
+              <div className="my-2">
+                <span className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">{stat.val}</span>
+              </div>
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">{stat.desc}</span>
+            </div>
+          ))}
         </div>
 
         {/* Timeline */}
         <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-accent to-secondary opacity-30"></div>
+          {/* Vertical line: Pulsing gradient line */}
+          <div className="absolute left-6 md:left-8 top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary via-accent to-secondary opacity-40 animate-pulse"></div>
 
-          <div className="space-y-8">
+          <div className="space-y-12">
             {experiences.map((exp) => (
-              <div key={exp.id} className="relative pl-20">
-                {/* Timeline dot */}
-                <div className="absolute left-0 top-1 w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ring-4 ring-background">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${exp.isCurrent
-                        ? "bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/50"
-                        : "bg-primary/60"
-                      }`}
-                  >
-                    <Briefcase className="w-4 h-4 text-white" />
+              <div key={exp.id} className="relative pl-14 md:pl-24 group/item">
+                
+                {/* Timeline dot: Dual-ring pulsing */}
+                <div className="absolute left-0 md:left-2 top-2 w-12 h-12 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center ring-4 ring-black z-10 transition-all duration-500 group-hover/item:border-primary/50 group-hover/item:scale-110">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 ${
+                    exp.isCurrent
+                      ? "bg-gradient-to-r from-primary via-accent to-secondary shadow-lg shadow-primary/40"
+                      : "bg-slate-900 border border-white/20"
+                  }`}>
+                    <Briefcase className="w-3.5 h-3.5 text-white" />
                   </div>
                 </div>
 
                 {/* Card */}
-                <Card className="border-primary/20 overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 group">
-                  <div className="grid sm:grid-cols-12 h-full">
-                    {/* Left Side: Icon & Period/Location */}
-                    <div className="sm:col-span-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden text-center border-b sm:border-b-0 border-primary/20">
-                      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                      <Briefcase className="w-10 h-10 text-primary mb-3 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">
-                        Work Experience
-                      </span>
-                      <span className="text-sm font-bold text-foreground mb-1">
-                        ⏱️ {exp.period}
-                      </span>
-                      <span className="text-xs font-semibold text-muted-foreground">
-                        📍 {exp.location}
-                      </span>
+                <Card className="border border-white/10 bg-slate-950/40 backdrop-blur-xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-500 group transform hover:-translate-y-1.5 rounded-3xl">
+                  <div className="grid md:grid-cols-12 h-full">
+                    {/* Left Side: Brand Panel */}
+                    <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white/[0.02] to-white/[0.04] relative overflow-hidden text-center border-b md:border-b-0 md:border-r border-white/10 min-h-[160px]">
+                      {/* Interactive light ray */}
+                      <div className="absolute -inset-x-20 -inset-y-40 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-3xl pointer-events-none"></div>
+                      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                      
+                      <div className="relative z-10">
+                        <Briefcase className="w-12 h-12 text-primary/80 mx-auto mb-4 group-hover:scale-110 group-hover:text-primary transition-all duration-300" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-2 block">
+                          {exp.company}
+                        </span>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white font-semibold shadow-inner mb-2">
+                          <Calendar className="w-3 h-3 text-accent" />
+                          {exp.period}
+                        </div>
+                        <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground font-medium mt-1">
+                          <MapPin className="w-3 h-3 text-secondary" />
+                          {exp.location}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Right Side: Details */}
-                    <div className="sm:col-span-8 p-6 flex flex-col justify-center sm:border-l border-border bg-card/50">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-xl font-bold text-foreground">
+                    <div className="md:col-span-8 p-6 md:p-8 flex flex-col justify-center bg-slate-950/20">
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-white group-hover:text-primary transition-colors duration-300">
                           {exp.title}
                         </h3>
                         {exp.isCurrent && (
-                          <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs font-semibold">
-                            Current
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                          </span>
+                        )}
+                        {exp.isCurrent && (
+                          <Badge className="bg-gradient-to-r from-primary via-accent to-secondary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
+                            Active Role
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm font-semibold text-primary mb-4">
-                        {exp.company}
-                      </p>
+                      
+                      <div className="w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-full mb-6"></div>
 
-                      {/* Description List */}
-                      <ul className="space-y-2.5 mb-4">
+                      {/* Description List with Lucide Icons */}
+                      <ul className="space-y-4 mb-6">
                         {exp.description.map((item, idx) => (
                           <li
                             key={idx}
-                            className="flex gap-2 text-sm text-muted-foreground leading-relaxed"
+                            className="flex items-start gap-3 text-sm text-muted-foreground leading-relaxed group/li"
                           >
-                            <span className="text-primary font-bold flex-shrink-0">
-                              •
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 group-hover/item:bg-primary/20 transition-colors">
+                              <Terminal className="w-3 h-3 text-primary" />
                             </span>
-                            <span>{item}</span>
+                            <span className="group-hover/li:text-white transition-colors duration-200">{item}</span>
                           </li>
                         ))}
                       </ul>
 
                       {/* Technology Tags */}
-                      <div className="flex flex-wrap gap-2 pt-3 border-t border-border/50">
+                      <div className="flex flex-wrap gap-2 pt-5 border-t border-white/5">
                         {exp.technologies.map((tech) => (
                           <Badge
                             key={tech}
                             variant="secondary"
-                            className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                            className="bg-white/5 text-muted-foreground border border-white/10 hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-all duration-300 text-xs font-semibold px-3 py-1 rounded-full cursor-default"
                           >
                             {tech}
                           </Badge>

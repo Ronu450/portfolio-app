@@ -1,5 +1,5 @@
-import { BookOpen, Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { BookOpen, Calendar, Shield, Cpu, GitBranch, Layers } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 
 interface Story {
@@ -54,54 +54,75 @@ export function Stories() {
     });
   };
 
+  const getCategoryDetails = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "technical":
+        return { icon: Cpu, color: "text-primary", bg: "from-primary/20 to-primary/5 border-primary/30" };
+      case "security":
+        return { icon: Shield, color: "text-accent", bg: "from-accent/20 to-accent/5 border-accent/30" };
+      case "devops":
+        return { icon: GitBranch, color: "text-secondary", bg: "from-secondary/20 to-secondary/5 border-secondary/30" };
+      case "architecture":
+        return { icon: Layers, color: "text-primary", bg: "from-primary/20 to-secondary/5 border-primary/30" };
+      default:
+        return { icon: BookOpen, color: "text-white", bg: "from-white/10 to-white/5 border-white/20" };
+    }
+  };
+
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-black">
+      <div className="max-w-5xl mx-auto">
         <div className="mb-16">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-3">
             My Stories
           </h2>
-          <p className="text-muted-foreground">
-            Thoughts, experiences, and insights
+          <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
+            Reflections, key learnings, and engineering highlights from my professional work.
           </p>
         </div>
 
-        <div className="space-y-6">
-          {stories.map((story) => (
-            <Card
-              key={story.id}
-              className="border-secondary/20 hover:shadow-lg hover:shadow-secondary/10 transition-all"
-            >
-              <CardHeader>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center flex-shrink-0 shadow-md">
-                    <BookOpen className="w-5 h-5 text-secondary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-foreground mb-2">
+        <div className="grid md:grid-cols-2 gap-6">
+          {stories.map((story) => {
+            const cat = getCategoryDetails(story.category);
+            const Icon = cat.icon;
+            return (
+              <Card
+                key={story.id}
+                className="border border-white/10 bg-slate-950/40 backdrop-blur-xl hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 group transform hover:-translate-y-1.5 rounded-3xl flex flex-col justify-between overflow-hidden"
+              >
+                <div className="p-6 md:p-8 space-y-4">
+                  {/* Category icon and title */}
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${cat.bg} border flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon className={`w-5 h-5 ${cat.color}`} />
+                    </div>
+                    <h3 className="font-extrabold text-lg text-white group-hover:text-primary transition-colors duration-300 leading-snug">
                       {story.title}
                     </h3>
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(story.date)}</span>
-                      </div>
-                      {story.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {story.category}
-                        </Badge>
-                      )}
-                    </div>
                   </div>
+
+                  <CardContent className="p-0 pt-2">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {story.content}
+                    </p>
+                  </CardContent>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <p className="text-muted-foreground leading-relaxed">
-                  {story.content}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+
+                {/* Footer details */}
+                <div className="px-6 py-4 md:px-8 bg-white/[0.02] border-t border-white/5 flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 font-medium">
+                    <Calendar className="w-3.5 h-3.5 text-accent" />
+                    <span>{formatDate(story.date)}</span>
+                  </div>
+                  {story.category && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-2.5 py-0.5 rounded-full cursor-default">
+                      {story.category}
+                    </Badge>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>

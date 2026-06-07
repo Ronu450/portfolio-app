@@ -1,6 +1,6 @@
 import { ArrowDown, MapPin, Code, Palette, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import profileFootballVideo from "../assets/profile-football.mp4";
+import profileFull from "../assets/profile-full.png";
 
 export function Hero() {
   const [videoUrl, setVideoUrl] = useState("./videos/my-video.mp4");
@@ -173,7 +173,7 @@ export function Hero() {
         <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-center w-full">
           {/* Left Column: Text & Info Content */}
           <div className="w-full md:col-span-7 text-left space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in-up">
-            
+
             {/* Top Row on Mobile: Name & Video Side-by-Side */}
             <div className="flex md:block items-center justify-between gap-4 w-full">
               <div className="space-y-3 sm:space-y-6 flex-1">
@@ -219,19 +219,15 @@ export function Hero() {
                 </div>
               </div>
 
-              {/* Juggling Video: Mobile Only side-by-side */}
+              {/* Profile Picture: Mobile Only side-by-side */}
               <div className="block md:hidden shrink-0 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
                 <div className="relative w-[110px] xs:w-[130px] aspect-[4/5] rounded-[16px] overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-white/[0.05]">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-accent/10 pointer-events-none rounded-[16px]"></div>
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover rounded-[14px] shadow-2xl animate-pulse-glow"
-                  >
-                    <source src={profileFootballVideo} type="video/mp4" />
-                  </video>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-primary/15 via-transparent to-accent/15 pointer-events-none rounded-[16px] z-10"></div>
+                  <img
+                    src={profileFull}
+                    alt="Ronu Skariah"
+                    className="w-full h-full object-cover rounded-[14px] shadow-2xl"
+                  />
                 </div>
               </div>
             </div>
@@ -278,23 +274,21 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Right Column: Premium Showcase Video (Desktop Only) */}
+          {/* Right Column: Premium Showcase Profile (Desktop Only) */}
           <div className="hidden md:flex md:col-span-5 justify-center lg:justify-end animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
             <div className="relative w-full max-w-[300px] lg:max-w-[400px] aspect-[4/5] rounded-[32px] overflow-hidden border border-white/20 shadow-2xl backdrop-blur-xl bg-white/[0.05] group transition-all duration-500 hover:scale-[1.02] hover:border-white/35">
-              
-              {/* Inner glowing shadow */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-accent/10 pointer-events-none rounded-[32px]"></div>
 
-              {/* Showcase Video Player */}
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover rounded-[30px] shadow-2xl animate-pulse-glow"
-              >
-                <source src={profileFootballVideo} type="video/mp4" />
-              </video>
+              {/* Inner glowing shadow */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-transparent to-accent/20 pointer-events-none rounded-[32px] z-10"></div>
+              {/* Bottom gradient mask for blending */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none rounded-[32px] z-10"></div>
+
+              {/* Blended Profile Image */}
+              <img
+                src={profileFull}
+                alt="Ronu Skariah"
+                className="w-full h-full object-cover rounded-[30px] shadow-2xl transform transition-transform duration-700 group-hover:scale-105 filter drop-shadow-[0_10px_25px_rgba(99,102,241,0.3)]"
+              />
             </div>
           </div>
         </div>

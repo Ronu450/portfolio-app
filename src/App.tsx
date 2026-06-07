@@ -36,7 +36,7 @@ export default function App() {
         {
           threshold: 0.15, // Trigger when 15% of the section is visible
           rootMargin: "-25% 0px -45% 0px", // Active viewport scan window
-        }
+        },
       );
 
       observer.observe(el);
@@ -103,10 +103,6 @@ export default function App() {
 
       <footer className="border-t border-primary/20 mt-20 py-8 text-center text-muted-foreground bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
         <p>© 2025 About Me Portfolio. All rights reserved.</p>
-        <p className="mt-2">
-          Made with <span className="text-secondary">🤖</span> and{" "}
-          <span className="text-primary">creativity</span>
-        </p>
       </footer>
     </div>
   );
