@@ -71,34 +71,60 @@ export function Experience() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-black">
       <div className="max-w-5xl mx-auto">
-        
         {/* Header */}
         <div className="mb-16">
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-3">
             Professional Journey
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
-            A timeline of engineering impactful, scalable software solutions across global enterprise platforms and cloud architectures.
+            A timeline of engineering impactful, scalable software solutions
+            across global enterprise platforms and cloud architectures.
           </p>
         </div>
 
         {/* Industry Experience Highlights Dashboard */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
           {[
-            { label: "Years in Industry", val: "2+ Yrs", desc: "Enterprise Engineering", color: "from-primary/20 to-primary/5 border-primary/30" },
-            { label: "Global Enterprise", val: "BofA", desc: "Bank of America", color: "from-accent/20 to-accent/5 border-accent/30" },
-            { label: "Systems Engineer", val: "Infosys", desc: "Cloud & Data Pipelines", color: "from-secondary/20 to-secondary/5 border-secondary/30" },
-            { label: "Core Stack", val: "Java/Py", desc: "Full Stack & DevOps", color: "from-primary/20 to-secondary/5 border-primary/30" }
+            {
+              label: "Years in Industry",
+              val: "3+ Yrs",
+              desc: "Enterprise Engineering",
+              color: "from-primary/20 to-primary/5 border-primary/30",
+            },
+            {
+              label: "Global Enterprise",
+              val: "BofA",
+              desc: "Bank of America",
+              color: "from-accent/20 to-accent/5 border-accent/30",
+            },
+            {
+              label: "Systems Engineer",
+              val: "Infosys",
+              desc: "Cloud & Data Pipelines",
+              color: "from-secondary/20 to-secondary/5 border-secondary/30",
+            },
+            {
+              label: "Core Stack",
+              val: "Java/Py",
+              desc: "Full Stack & DevOps",
+              color: "from-primary/20 to-secondary/5 border-primary/30",
+            },
           ].map((stat, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={`p-5 rounded-2xl bg-gradient-to-br ${stat.color} border border-white/10 backdrop-blur-md hover:scale-[1.02] transition-transform duration-300 flex flex-col justify-between`}
             >
-              <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">{stat.label}</span>
+              <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">
+                {stat.label}
+              </span>
               <div className="my-2">
-                <span className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">{stat.val}</span>
+                <span className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                  {stat.val}
+                </span>
               </div>
-              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">{stat.desc}</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">
+                {stat.desc}
+              </span>
             </div>
           ))}
         </div>
@@ -111,14 +137,15 @@ export function Experience() {
           <div className="space-y-12">
             {experiences.map((exp) => (
               <div key={exp.id} className="relative pl-14 md:pl-24 group/item">
-                
                 {/* Timeline dot: Dual-ring pulsing */}
                 <div className="absolute left-0 md:left-2 top-2 w-12 h-12 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center ring-4 ring-black z-10 transition-all duration-500 group-hover/item:border-primary/50 group-hover/item:scale-110">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 ${
-                    exp.isCurrent
-                      ? "bg-gradient-to-r from-primary via-accent to-secondary shadow-lg shadow-primary/40"
-                      : "bg-slate-900 border border-white/20"
-                  }`}>
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 ${
+                      exp.isCurrent
+                        ? "bg-gradient-to-r from-primary via-accent to-secondary shadow-lg shadow-primary/40"
+                        : "bg-slate-900 border border-white/20"
+                    }`}
+                  >
                     <Briefcase className="w-3.5 h-3.5 text-white" />
                   </div>
                 </div>
@@ -131,7 +158,7 @@ export function Experience() {
                       {/* Interactive light ray */}
                       <div className="absolute -inset-x-20 -inset-y-40 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-3xl pointer-events-none"></div>
                       <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                      
+
                       <div className="relative z-10">
                         <Briefcase className="w-12 h-12 text-primary/80 mx-auto mb-4 group-hover:scale-110 group-hover:text-primary transition-all duration-300" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-2 block">
@@ -166,7 +193,7 @@ export function Experience() {
                           </Badge>
                         )}
                       </div>
-                      
+
                       <div className="w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-full mb-6"></div>
 
                       {/* Description List with Lucide Icons */}
@@ -179,7 +206,9 @@ export function Experience() {
                             <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 group-hover/item:bg-primary/20 transition-colors">
                               <Terminal className="w-3 h-3 text-primary" />
                             </span>
-                            <span className="group-hover/li:text-white transition-colors duration-200">{item}</span>
+                            <span className="group-hover/li:text-white transition-colors duration-200">
+                              {item}
+                            </span>
                           </li>
                         ))}
                       </ul>
