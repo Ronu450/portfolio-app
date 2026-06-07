@@ -1,13 +1,13 @@
 import {
   Mail,
-  Phone,
   MapPin,
   Github,
   Linkedin,
-  Twitter,
   Send,
+  MessageSquare,
+  Share2,
 } from "lucide-react";
-import { Card, CardContent } from "./ui/card";
+import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -18,35 +18,29 @@ import { toast } from "sonner";
 export function Contact() {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     message: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, you would send this data to a backend
     toast.success("Message sent successfully!");
-    setFormData({ name: "", email: "", message: "" });
+    setFormData({ name: "", message: "" });
   };
 
   const contactInfo = [
     {
       icon: Mail,
       label: "Email",
-      value: "ronu0623@gmail.com",
-      href: "mailto:ronu0623@gmail.com",
-    },
-    {
-      icon: Phone,
-      label: "Phone",
-      value: "+1 (555) 123-4567",
-      href: "tel:+15551234567",
+      value: "ronu.skariah@outlook.com",
+      href: "mailto:ronu.skariah@outlook.com",
+      gradient: "from-primary/10 to-accent/10 border-primary/20",
     },
     {
       icon: MapPin,
       label: "Location",
       value: "Dublin, Ireland",
       href: null,
+      gradient: "from-secondary/10 to-primary/10 border-secondary/20",
     },
   ];
 
@@ -59,12 +53,7 @@ export function Contact() {
     {
       icon: Linkedin,
       label: "LinkedIn",
-      href: "https://www.linkedin.com/in/ronu-skariah",
-    },
-    {
-      icon: Twitter,
-      label: "Twitter",
-      href: "https://twitter.com/yourusername",
+      href: "https://www.linkedin.com/in/ronu-skariah ",
     },
   ];
 
@@ -72,7 +61,7 @@ export function Contact() {
     <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="mb-2 bg-gradient-to-r from-accent via-secondary to-primary bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
             Get In Touch
           </h2>
           <p className="text-muted-foreground">
@@ -80,107 +69,136 @@ export function Contact() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Contact Information */}
-          <div className="space-y-6">
-            <Card className="border-primary/20 hover:shadow-lg hover:shadow-primary/10 transition-all">
-              <CardContent className="p-6">
-                <h3 className="mb-6 text-primary">Contact Information</h3>
-                <div className="space-y-4">
-                  {contactInfo.map((info, index) => (
-                    <div key={index} className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0 shadow-md">
-                        <info.icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">{info.label}</p>
-                        {info.href ? (
-                          <a
-                            href={info.href}
-                            className="hover:text-primary transition-colors"
-                          >
-                            {info.value}
-                          </a>
-                        ) : (
-                          <p>{info.value}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+        {/* Contact Info Grid */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {contactInfo.map((info, index) => (
+            <Card
+              key={index}
+              className="border-primary/20 overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group"
+            >
+              <div className="grid grid-cols-12 h-full">
+                {/* Left Side Icon Badge */}
+                <div className={`col-span-4 flex items-center justify-center p-4 bg-gradient-to-br ${info.gradient} border-r`}>
+                  <info.icon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform duration-300" />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-accent/20 hover:shadow-lg hover:shadow-accent/10 transition-all">
-              <CardContent className="p-6">
-                <h3 className="mb-6 text-accent">Social Media</h3>
-                <div className="flex gap-3">
-                  {socialLinks.map((social, index) => (
+                {/* Right Side Content */}
+                <div className="col-span-8 p-4 flex flex-col justify-center bg-card/50">
+                  <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider mb-1 block">
+                    {info.label}
+                  </span>
+                  {info.href ? (
                     <a
-                      key={index}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent/20 to-secondary/20 flex items-center justify-center hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-1"
+                      href={info.href}
+                      className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate block"
                     >
-                      <social.icon className="w-5 h-5 text-accent" />
+                      {info.value}
                     </a>
-                  ))}
+                  ) : (
+                    <span className="text-sm font-semibold text-foreground truncate block">
+                      {info.value}
+                    </span>
+                  )}
                 </div>
-              </CardContent>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Social Media (4 cols) */}
+          <div className="lg:col-span-4 h-full">
+            <Card className="border-accent/20 overflow-hidden hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 group h-full">
+              <div className="grid grid-cols-12 h-full min-h-[160px] lg:flex lg:flex-col lg:h-full">
+                {/* Left/Top Side: Icon Badge */}
+                <div className="col-span-4 lg:w-full lg:h-24 flex items-center justify-center p-4 bg-gradient-to-br from-accent/10 to-secondary/10 border-r lg:border-r-0 lg:border-b border-accent/20 flex-shrink-0">
+                  <Share2 className="w-8 h-8 text-accent group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                {/* Right/Bottom Side Details */}
+                <div className="col-span-8 lg:w-full lg:flex-1 p-6 flex flex-col justify-center bg-card/50">
+                  <h3 className="text-lg font-bold text-accent mb-4">Connect Socially</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {socialLinks.map((social, index) => (
+                      <a
+                        key={index}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/15 to-secondary/15 flex items-center justify-center hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-1"
+                        title={social.label}
+                      >
+                        <social.icon className="w-4 h-4 text-accent" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </Card>
           </div>
 
-          {/* Contact Form */}
-          <Card className="border-secondary/20 hover:shadow-lg hover:shadow-secondary/10 transition-all">
-            <CardContent className="p-6">
-              <h3 className="mb-6 text-secondary">Send Me a Message</h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Ronu Skariah"
-                    required
-                  />
+          {/* Contact Message Form (8 cols) */}
+          <div className="lg:col-span-8">
+            <Card className="border-secondary/20 overflow-hidden hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300 group">
+              <div className="grid sm:grid-cols-12 h-full">
+                {/* Left Side decorative gradient */}
+                <div className="sm:col-span-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-secondary/10 to-primary/10 relative overflow-hidden text-center border-b sm:border-b-0 border-secondary/20">
+                  <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                  <MessageSquare className="w-10 h-10 text-secondary mb-3 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">
+                    Write to me
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    I typically respond within 24 hours.
+                  </span>
                 </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    placeholder="ronu0623@gmail.com"
-                    required
-                  />
+
+                {/* Right Side: Form inputs */}
+                <div className="sm:col-span-8 p-6 bg-card/50 sm:border-l border-border">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        placeholder="Alan Walker"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value="ronu.skariah@outlook.com"
+                        readOnly
+                        disabled
+                        className="bg-muted text-muted-foreground cursor-not-allowed opacity-70"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="message">Message</Label>
+                      <Textarea
+                        id="message"
+                        value={formData.message}
+                        onChange={(e) =>
+                          setFormData({ ...formData, message: e.target.value })
+                        }
+                        placeholder="Tell me about your project..."
+                        rows={4}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full cursor-pointer">
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </Button>
+                  </form>
                 </div>
-                <div>
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea
-                    id="message"
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    placeholder="Tell me about your project..."
-                    rows={6}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  <Send className="w-4 h-4 mr-2" />
-                  Send Message
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </section>

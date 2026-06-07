@@ -1,12 +1,6 @@
-import { useState } from 'react';
-import { BookOpen, Plus, Trash2, Edit2, Calendar } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Label } from './ui/label';
-import { Badge } from './ui/badge';
+import { BookOpen, Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader } from "./ui/card";
+import { Badge } from "./ui/badge";
 
 interface Story {
   id: string;
@@ -17,195 +11,97 @@ interface Story {
 }
 
 export function Stories() {
-  const [stories, setStories] = useState<Story[]>([
+  const stories: Story[] = [
     {
-      id: '1',
-      title: 'My Journey into Web Development',
-      date: '2024-01-15',
-      category: 'Career',
-      content: 'It all started when I built my first website. The excitement of seeing my code come to life on the screen was indescribable. From that moment, I knew I wanted to pursue a career in web development...',
+      id: "1",
+      title: "Architecting Scalable REST APIs with Spring Boot",
+      date: "2024-01-15",
+      category: "Technical",
+      content:
+        "At Bank of America, I led the development and maintenance of RESTful APIs using Java Spring Boot, JPA, and Hibernate to support high-traffic applications. The key challenge was ensuring scalability while maintaining code quality. Through implementing entity auditing with Hibernate Envers and conducting rigorous peer code reviews, I learned the importance of monitoring data changes and maintaining historical records for compliance and debugging purposes.",
     },
     {
-      id: '2',
-      title: 'Lessons Learned from My First Big Project',
-      date: '2024-02-20',
-      category: 'Learning',
-      content: 'Working on my first major project taught me invaluable lessons about planning, communication, and perseverance. Here are some key takeaways that shaped my approach to development...',
+      id: "2",
+      title: "Full-Stack Authentication with OAuth 2.0",
+      date: "2024-02-20",
+      category: "Security",
+      content:
+        "Implementing a comprehensive OAuth 2.0 authentication and authorization solution across both Spring Boot backend and React frontend was a transformative experience. This project taught me the critical importance of security in modern applications. From managing access control to protecting sensitive user data, I discovered how proper authentication architecture strengthens the entire application ecosystem. The key takeaway: security is not a feature to add later—it must be architected from the beginning.",
     },
-  ]);
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    date: '',
-    category: '',
-    content: '',
-  });
-
-  const handleAdd = () => {
-    setEditingId(null);
-    const today = new Date().toISOString().split('T')[0];
-    setFormData({ title: '', date: today, category: '', content: '' });
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (story: Story) => {
-    setEditingId(story.id);
-    setFormData({
-      title: story.title,
-      date: story.date,
-      category: story.category,
-      content: story.content,
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleSave = () => {
-    if (editingId) {
-      setStories(stories.map(story => 
-        story.id === editingId ? { ...story, ...formData } : story
-      ));
-    } else {
-      setStories([
-        { id: Date.now().toString(), ...formData },
-        ...stories,
-      ]);
-    }
-    setIsDialogOpen(false);
-  };
-
-  const handleDelete = (id: string) => {
-    setStories(stories.filter(story => story.id !== id));
-  };
+    {
+      id: "3",
+      title: "Automating ETL Pipelines: From Manual to Intelligent",
+      date: "2024-03-10",
+      category: "DevOps",
+      content:
+        "During my time at Infosys, I transformed manual data processing workflows into intelligent, automated ETL pipelines using Python, Apache Airflow, and DBT. Building and managing workflows across AWS and Azure taught me how to orchestrate complex data transformations at scale. The most valuable lesson: proper pipeline architecture reduces errors, accelerates processing, and frees teams to focus on strategic improvements rather than repetitive tasks.",
+    },
+    {
+      id: "4",
+      title: "Refactoring Legacy Code: From Spaghetti to Clean Architecture",
+      date: "2024-04-05",
+      category: "Architecture",
+      content:
+        "One of my proudest achievements at Bank of America was refactoring a complex React.js front-end codebase to eliminate unused components and simplify architecture. This experience reinforced a fundamental principle: maintaining code quality is an ongoing responsibility. By removing technical debt early and organizing code properly, we improved both maintainability and performance. Sometimes the most impactful work isn't building new features—it's making the existing codebase better.",
+    },
+  ];
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-12">
-          <div>
-            <h2 className="mb-2 text-secondary">My Stories</h2>
-            <p className="text-muted-foreground">Thoughts, experiences, and insights</p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleAdd}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Story
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>{editingId ? 'Edit' : 'Add'} Story</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Title</Label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Give your story a title"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Date</Label>
-                    <Input
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Category</Label>
-                    <Input
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      placeholder="e.g. Career, Learning"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label>Content</Label>
-                  <Textarea
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Write your story here..."
-                    rows={8}
-                  />
-                </div>
-                <Button onClick={handleSave} className="w-full">
-                  {editingId ? 'Update' : 'Publish'} Story
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+        <div className="mb-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
+            My Stories
+          </h2>
+          <p className="text-muted-foreground">
+            Thoughts, experiences, and insights
+          </p>
         </div>
 
         <div className="space-y-6">
-          {stories.length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="py-12 text-center">
-                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No stories yet. Click "Add Story" to share your first story!</p>
-              </CardContent>
-            </Card>
-          ) : (
-            stories.map((story) => (
-              <Card key={story.id} className="border-secondary/20 hover:shadow-lg hover:shadow-secondary/10 transition-all">
-                <CardHeader>
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center flex-shrink-0 shadow-md">
-                          <BookOpen className="w-5 h-5 text-secondary" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle>{story.title}</CardTitle>
-                          <div className="flex items-center gap-3 mt-2">
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Calendar className="w-4 h-4" />
-                              <span>{formatDate(story.date)}</span>
-                            </div>
-                            {story.category && (
-                              <Badge variant="secondary">{story.category}</Badge>
-                            )}
-                          </div>
-                        </div>
+          {stories.map((story) => (
+            <Card
+              key={story.id}
+              className="border-secondary/20 hover:shadow-lg hover:shadow-secondary/10 transition-all"
+            >
+              <CardHeader>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center flex-shrink-0 shadow-md">
+                    <BookOpen className="w-5 h-5 text-secondary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-foreground mb-2">
+                      {story.title}
+                    </h3>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span>{formatDate(story.date)}</span>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(story)}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(story.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {story.category && (
+                        <Badge variant="secondary" className="text-xs">
+                          {story.category}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground whitespace-pre-line">{story.content}</p>
-                </CardContent>
-              </Card>
-            ))
-          )}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <p className="text-muted-foreground leading-relaxed">
+                  {story.content}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </section>

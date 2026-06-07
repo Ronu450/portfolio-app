@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:css": "tailwindcss -i ./src/styles/tailwind.css -o ./src/index.css --watch",
-    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./src/index.css --minify",
+    "dev:css": "npx @tailwindcss/cli -i ./src/styles/tailwind.css -o ./src/index.css --watch",
+    "build:css": "npx @tailwindcss/cli -i ./src/styles/tailwind.css -o ./src/index.css --minify",
     "dev:all": "concurrently \"npm:dev:css\" \"npm:dev\"",
     "build:all": "npm run build:css && npm run build",
     "build": "npm run build:css && tsc && vite build",
