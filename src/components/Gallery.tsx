@@ -1,114 +1,133 @@
-import { Card } from "./ui/card";
-import { Camera, Heart, Navigation, Users } from "lucide-react";
+import { Camera, Heart, Navigation, Quote, Users } from "lucide-react";
+import type { ComponentType } from "react";
 
-import dogPic from "../assets/dog.jpg";
 import bikePic from "../assets/bike.jpg";
-import groupPic from "../assets/group.jpg";
 import bearPic from "../assets/beer.jpg";
+import dogPic from "../assets/dog.jpg";
+import groupPic from "../assets/group.jpg";
 
 interface GalleryTile {
   id: string;
   category: string;
   title: string;
   quote: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   imageSrc: string;
-  gradient: string;
+  imageFit: "cover" | "contain";
 }
 
-export function Gallery() {
-  const tiles: GalleryTile[] = [
-    {
-      id: "dog",
-      category: "Companion",
-      title: "My Dog",
-      quote: "My companion for my motivation — a constant source of unconditional joy and daily inspiration.",
-      icon: Heart,
-      imageSrc: dogPic,
-      gradient: "from-amber-500/10 to-orange-500/10 border-orange-500/20",
-    },
-    {
-      id: "bike",
-      category: "Adventure",
-      title: "My Bike",
-      quote: "Chasing horizons and finding absolute freedom on two wheels. The road is my canvas.",
-      icon: Navigation,
-      imageSrc: bikePic,
-      gradient: "from-blue-500/10 to-indigo-500/10 border-blue-500/20",
-    },
-    {
-      id: "undergrad",
-      category: "Memories",
-      title: "Undergraduation Group",
-      quote: "Where the journey began — lifelong friendships forged, lessons learned, and dreams shared.",
-      icon: Users,
-      imageSrc: groupPic,
-      gradient: "from-purple-500/10 to-pink-500/10 border-purple-500/20",
-    },
-    {
-      id: "bear",
-      category: "Photography",
-      title: "Bear in the Wild",
-      quote: "A rare moment captured in the wild — witnessing nature's raw majesty and quiet power.",
-      icon: Camera,
-      imageSrc: bearPic,
-      gradient: "from-emerald-500/10 to-teal-500/10 border-emerald-500/20",
-    },
-  ];
+const tiles: GalleryTile[] = [
+  {
+    id: "jackie",
+    category: "Companion",
+    title: "Jackie",
+    quote:
+      "Jackie is a constant source of unconditional joy and daily inspiration.",
+    icon: Heart,
+    imageSrc: dogPic,
+    imageFit: "contain",
+  },
+  {
+    id: "bike",
+    category: "Adventure",
+    title: "My Bike",
+    quote:
+      "Chasing horizons and finding absolute freedom on two wheels. The road is my canvas.",
+    icon: Navigation,
+    imageSrc: bikePic,
+    imageFit: "cover",
+  },
+  {
+    id: "undergrad",
+    category: "Memories",
+    title: "Undergraduation Group",
+    quote:
+      "Where the journey began — lifelong friendships forged, lessons learned, and dreams shared.",
+    icon: Users,
+    imageSrc: groupPic,
+    imageFit: "cover",
+  },
+  {
+    id: "bear",
+    category: "Photography",
+    title: "Bear in the Wild",
+    quote:
+      "A rare moment captured in the wild — witnessing nature's raw majesty and quiet power.",
+    icon: Camera,
+    imageSrc: bearPic,
+    imageFit: "cover",
+  },
+];
 
+export function Gallery() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-16 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
+    <section className="bg-background px-4 py-24 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-10 max-w-2xl">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            Beyond the work
+          </p>
+          <h2 className="mb-3 text-3xl font-bold text-foreground sm:text-4xl">
             My Gallery
           </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            A visual diary of my inspirations, adventures, and the moments that shape my journey.
+          <p className="max-w-xl leading-relaxed text-muted-foreground">
+            A visual diary of my inspirations, adventures, and the moments that
+            shape my journey.
           </p>
         </div>
 
-        {/* Gallery Grid Tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {tiles.map((tile) => (
-            <Card
+        <div className="grid grid-cols-1 items-stretch gap-7 sm:grid-cols-2 lg:gap-8">
+          {tiles.map((tile, index) => (
+            <figure
               key={tile.id}
-              className={`overflow-hidden border bg-card hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group`}
+              className="group flex h-full flex-col rounded-xl bg-[#252a24] p-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.2)] ring-1 ring-inset ring-white/10 transition-transform duration-300 hover:-translate-y-1 sm:p-3"
             >
-              <div className="grid sm:grid-cols-2 h-full">
-                
-                {/* Image Tile */}
-                <div className="aspect-square sm:aspect-auto relative overflow-hidden bg-muted">
+              <div className="flex h-full flex-col rounded-md bg-[#e7e9e2] p-3 sm:p-4">
+                <div
+                  className={`relative aspect-[4/3] shrink-0 overflow-hidden rounded-[2px] ${tile.imageFit === "contain" ? "bg-[#d6dbd1]" : "bg-muted"}`}
+                >
                   <img
                     src={tile.imageSrc}
-                    alt={tile.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    alt={
+                      tile.id === "jackie"
+                        ? "Jackie sitting on grass"
+                        : `${tile.title}, ${tile.category.toLowerCase()}`
+                    }
+                    loading="lazy"
+                    decoding="async"
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className={`h-full w-full ${tile.imageFit === "contain" ? "object-contain" : "object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"}`}
                   />
-                  {/* Subtle category tag on image */}
-                  <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white border border-white/10 flex items-center gap-1.5 shadow-lg">
-                    <tile.icon className="w-3 h-3 text-primary-foreground" />
-                    <span>{tile.category}</span>
-                  </div>
+                  <span className="absolute left-3 top-3 rounded-sm bg-black/65 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                 </div>
 
-                {/* Quote details Tile */}
-                <div className="p-8 flex flex-col justify-center border-t sm:border-t-0 sm:border-l border-border bg-card/50">
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest mb-2 block">
-                    {tile.category}
-                  </span>
-                  <h3 className="text-xl font-bold mb-4 text-foreground">
-                    {tile.title}
-                  </h3>
-                  <div className="relative">
-                    <span className="text-4xl text-primary/20 font-serif absolute -top-4 -left-2">“</span>
-                    <p className="text-muted-foreground leading-relaxed italic relative z-10 pl-4">
+                <figcaption className="flex flex-1 flex-col px-1 pb-1 pt-4 sm:px-2 sm:pt-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#536340]">
+                        <tile.icon className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>{tile.category}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold leading-snug text-[#1c211b] sm:text-xl">
+                        {tile.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <blockquote className="mt-3 flex flex-1 items-start gap-2 border-t border-[#343b31]/15 pt-3">
+                    <Quote
+                      className="mt-0.5 h-4 w-4 shrink-0 text-[#687650]"
+                      aria-hidden="true"
+                    />
+                    <p className="text-sm leading-relaxed text-[#4b5148]">
                       {tile.quote}
                     </p>
-                  </div>
-                </div>
-
+                  </blockquote>
+                </figcaption>
               </div>
-            </Card>
+            </figure>
           ))}
         </div>
       </div>

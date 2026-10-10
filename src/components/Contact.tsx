@@ -1,203 +1,336 @@
 import {
-  Mail,
-  MapPin,
+  ArrowUpRight,
   Github,
   Linkedin,
+  Mail,
+  MapPin,
   Send,
   MessageSquare,
-  Share2,
 } from "lucide-react";
-import { Card } from "./ui/card";
+import type { FormEvent } from "react";
+import type { ComponentType } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
-import { useState } from "react";
-import { toast } from "sonner";
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
+type ContactField = keyof ContactFormData;
+type ContactErrors = Record<ContactField, string>;
+
+interface SocialLink {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  href: string;
+}
+
+const emailAddress = "ronu.skariah@outlook.com";
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const socialLinks: SocialLink[] = [
+  {
+    icon: Github,
+    label: "GitHub",
+    href: "https://github.com/Ronu450",
+  },
+  {
+    icon: Linkedin,
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/ronu-skariah",
+  },
+];
+
+function validateField(field: ContactField, value: string): string {
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    return field === "name"
+      ? "Enter your name."
+      : field === "email"
+        ? "Enter your email address."
+        : "Enter a message.";
+  }
+
+  if (field === "email" && !emailPattern.test(normalizedValue)) {
+    return "Enter a valid email address.";
+  }
+
+  return "";
+}
 
 export function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: "",
+    email: "",
     message: "",
   });
+  const [formErrors, setFormErrors] = useState<ContactErrors>({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [formStatus, setFormStatus] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Message sent successfully!");
-    setFormData({ name: "", message: "" });
+  const updateField = (field: ContactField, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setFormErrors((current) => ({ ...current, [field]: "" }));
+    setFormStatus("");
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      label: "Email",
-      value: "ronu.skariah@outlook.com",
-      href: "mailto:ronu.skariah@outlook.com",
-      gradient: "from-primary/10 to-accent/10 border-primary/20",
-    },
-    {
-      icon: MapPin,
-      label: "Location",
-      value: "Dublin, Ireland",
-      href: null,
-      gradient: "from-secondary/10 to-primary/10 border-secondary/20",
-    },
-  ];
+  const validateOnBlur = (field: ContactField) => {
+    setFormErrors((current) => ({
+      ...current,
+      [field]: validateField(field, formData[field]),
+    }));
+  };
 
-  const socialLinks = [
-    {
-      icon: Github,
-      label: "GitHub",
-      href: "https://github.com/Ronu450",
-    },
-    {
-      icon: Linkedin,
-      label: "LinkedIn",
-      href: "https://www.linkedin.com/in/ronu-skariah ",
-    },
-  ];
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextErrors: ContactErrors = {
+      name: validateField("name", formData.name),
+      email: validateField("email", formData.email),
+      message: validateField("message", formData.message),
+    };
+    setFormErrors(nextErrors);
+
+    const firstInvalidField = (
+      ["name", "email", "message"] as ContactField[]
+    ).find((field) => nextErrors[field]);
+    if (firstInvalidField) {
+      document.getElementById(firstInvalidField)?.focus();
+      return;
+    }
+
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const subject = encodeURIComponent(`Portfolio inquiry from ${name}`);
+    const body = encodeURIComponent(
+      `From: ${name} <${email}>\n\n${formData.message.trim()}`,
+    );
+    setFormStatus(
+      "Opening your email app with a draft. If it doesn't open, use the direct email link.",
+    );
+    window.location.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
+  };
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
-            Get In Touch
-          </h2>
-          <p className="text-muted-foreground">
-            Have a project in mind? Let's work together!
+    <section className="px-4 py-24 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-10 max-w-2xl">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            A direct line
           </p>
-        </div>
+          <h2 className="mb-3 text-3xl font-bold text-foreground sm:text-4xl">
+            Get in touch
+          </h2>
+          <p className="leading-relaxed text-muted-foreground">
+            Have a project in mind? Send a note and I’ll get back to you.
+          </p>
+        </header>
 
-        {/* Contact Info Grid */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {contactInfo.map((info, index) => (
-            <Card
-              key={index}
-              className="border-primary/20 overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group"
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <aside className="lg:col-span-4">
+            <h3 className="mb-4 text-sm font-semibold text-foreground">
+              Contact directly
+            </h3>
+            <a
+              href={`mailto:${emailAddress}`}
+              className="group flex items-center gap-3 border-b border-white/10 py-4 focus-visible:outline-offset-4"
             >
-              <div className="grid grid-cols-12 h-full">
-                {/* Left Side Icon Badge */}
-                <div className={`col-span-4 flex items-center justify-center p-4 bg-gradient-to-br ${info.gradient} border-r`}>
-                  <info.icon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform duration-300" />
-                </div>
-                {/* Right Side Content */}
-                <div className="col-span-8 p-4 flex flex-col justify-center bg-card/50">
-                  <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider mb-1 block">
-                    {info.label}
-                  </span>
-                  {info.href ? (
-                    <a
-                      href={info.href}
-                      className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate block"
-                    >
-                      {info.value}
-                    </a>
-                  ) : (
-                    <span className="text-sm font-semibold text-foreground truncate block">
-                      {info.value}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Mail className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="mb-1 block text-xs text-muted-foreground">
+                  Email
+                </span>
+                <span className="block break-all text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                  {emailAddress}
+                </span>
+              </span>
+              <ArrowUpRight
+                className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
+                aria-hidden="true"
+              />
+            </a>
 
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Social Media (4 cols) */}
-          <div className="lg:col-span-4 h-full">
-            <Card className="border-accent/20 overflow-hidden hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 group h-full">
-              <div className="grid grid-cols-12 h-full min-h-[160px] lg:flex lg:flex-col lg:h-full">
-                {/* Left/Top Side: Icon Badge */}
-                <div className="col-span-4 lg:w-full lg:h-24 flex items-center justify-center p-4 bg-gradient-to-br from-accent/10 to-secondary/10 border-r lg:border-r-0 lg:border-b border-accent/20 flex-shrink-0">
-                  <Share2 className="w-8 h-8 text-accent group-hover:scale-110 transition-transform duration-300" />
-                </div>
-                {/* Right/Bottom Side Details */}
-                <div className="col-span-8 lg:w-full lg:flex-1 p-6 flex flex-col justify-center bg-card/50">
-                  <h3 className="text-lg font-bold text-accent mb-4">Connect Socially</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {socialLinks.map((social, index) => (
-                      <a
-                        key={index}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/15 to-secondary/15 flex items-center justify-center hover:shadow-lg hover:shadow-accent/30 transition-all hover:-translate-y-1"
-                        title={social.label}
-                      >
-                        <social.icon className="w-4 h-4 text-accent" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
+            <div className="flex items-center gap-3 border-b border-white/10 py-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MapPin className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <span>
+                <span className="mb-1 block text-xs text-muted-foreground">
+                  Location
+                </span>
+                <span className="block text-sm font-medium text-foreground">
+                  Dublin, Ireland
+                </span>
+              </span>
+            </div>
 
-          {/* Contact Message Form (8 cols) */}
-          <div className="lg:col-span-8">
-            <Card className="border-secondary/20 overflow-hidden hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300 group">
-              <div className="grid sm:grid-cols-12 h-full">
-                {/* Left Side decorative gradient */}
-                <div className="sm:col-span-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-secondary/10 to-primary/10 relative overflow-hidden text-center border-b sm:border-b-0 border-secondary/20">
-                  <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                  <MessageSquare className="w-10 h-10 text-secondary mb-3 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">
-                    Write to me
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    I typically respond within 24 hours.
-                  </span>
-                </div>
-
-                {/* Right Side: Form inputs */}
-                <div className="sm:col-span-8 p-6 bg-card/50 sm:border-l border-border">
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        placeholder="Alan Walker"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value="ronu.skariah@outlook.com"
-                        readOnly
-                        disabled
-                        className="bg-muted text-muted-foreground cursor-not-allowed opacity-70"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="message">Message</Label>
-                      <Textarea
-                        id="message"
-                        value={formData.message}
-                        onChange={(e) =>
-                          setFormData({ ...formData, message: e.target.value })
-                        }
-                        placeholder="Tell me about your project..."
-                        rows={4}
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full cursor-pointer">
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
-                    </Button>
-                  </form>
-                </div>
+            <div className="mt-7">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">
+                Find me elsewhere
+              </h3>
+              <div className="flex items-center gap-2">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${social.label} profile in a new tab`}
+                    title={social.label}
+                    className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                  >
+                    <social.icon className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                ))}
               </div>
-            </Card>
+            </div>
+
+            <p className="mt-8 flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
+              <MessageSquare
+                className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+              I typically respond within 24 hours.
+            </p>
+          </aside>
+
+          <div className="lg:col-span-8 rounded-xl border border-white/10 bg-card p-5 sm:p-7">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground">
+                Send a message
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Submitting opens a draft in your email app; this site doesn’t
+                send or store your message.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+              <div>
+                <Label
+                  htmlFor="name"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  autoComplete="name"
+                  maxLength={80}
+                  value={formData.name}
+                  onChange={(event) => updateField("name", event.target.value)}
+                  onBlur={() => validateOnBlur("name")}
+                  aria-invalid={Boolean(formErrors.name)}
+                  aria-describedby={formErrors.name ? "name-error" : undefined}
+                  placeholder="Your name"
+                  required
+                />
+                {formErrors.name && (
+                  <p
+                    id="name-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-400"
+                  >
+                    {formErrors.name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label
+                  htmlFor="email"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Email address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  maxLength={254}
+                  value={formData.email}
+                  onChange={(event) => updateField("email", event.target.value)}
+                  onBlur={() => validateOnBlur("email")}
+                  aria-invalid={Boolean(formErrors.email)}
+                  aria-describedby={
+                    formErrors.email ? "email-error" : undefined
+                  }
+                  placeholder="you@example.com"
+                  required
+                />
+                {formErrors.email && (
+                  <p
+                    id="email-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-400"
+                  >
+                    {formErrors.email}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label
+                  htmlFor="message"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Message
+                </Label>
+                <Textarea
+                  id="message"
+                  value={formData.message}
+                  onChange={(event) =>
+                    updateField("message", event.target.value)
+                  }
+                  onBlur={() => validateOnBlur("message")}
+                  aria-invalid={Boolean(formErrors.message)}
+                  aria-describedby={
+                    formErrors.message ? "message-error" : undefined
+                  }
+                  placeholder="What are you working on?"
+                  rows={5}
+                  maxLength={5000}
+                  required
+                />
+                {formErrors.message && (
+                  <p
+                    id="message-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-400"
+                  >
+                    {formErrors.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <Button type="submit" className="min-h-11 w-full sm:w-auto">
+                  <Send className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Open email draft
+                </Button>
+                {formStatus && (
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className="text-sm text-muted-foreground"
+                  >
+                    {formStatus}
+                  </p>
+                )}
+              </div>
+            </form>
           </div>
         </div>
       </div>

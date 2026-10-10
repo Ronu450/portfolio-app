@@ -1,4 +1,11 @@
-import { Briefcase, Calendar, MapPin, Terminal } from "lucide-react";
+import {
+  Briefcase,
+  Calendar,
+  LaptopMinimal,
+  MapPin,
+  PersonStanding,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 
@@ -11,6 +18,24 @@ interface ExperienceItem {
   description: string[];
   technologies: string[];
   isCurrent?: boolean;
+}
+
+function calculateExperienceYears(startDate: string): number {
+  const start = new Date(startDate);
+  const now = new Date();
+  const elapsedMs = now.getTime() - start.getTime();
+
+  return elapsedMs / (1000 * 60 * 60 * 24 * 365.25);
+}
+
+function formatExperienceYears(startDate: string): string {
+  const years = calculateExperienceYears(startDate);
+
+  if (years >= 1) {
+    return `${years.toFixed(1).replace(/\.0$/, "")}+ Yrs`;
+  }
+
+  return `${Math.max(1, Math.round(years * 12))} Months`;
 }
 
 export function Experience() {
@@ -68,8 +93,108 @@ export function Experience() {
     },
   ];
 
+  const timelineExperiences = experiences.slice().reverse();
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const lastStopRef = useRef(-1);
+  const [walkerOffset, setWalkerOffset] = useState(0);
+  const [routeHeight, setRouteHeight] = useState(48);
+  const [walkerProgress, setWalkerProgress] = useState(0);
+  const [isWalking, setIsWalking] = useState(false);
+
+  useEffect(() => {
+    const timeline = timelineRef.current;
+    if (!timeline || !("IntersectionObserver" in window)) return;
+
+    const stops = Array.from(
+      timeline.querySelectorAll<HTMLElement>("[data-career-stop]"),
+    );
+    let movementTimer: number | undefined;
+    let measuredRouteHeight = 48;
+
+    const updateRouteHeight = () => {
+      const finalStop = stops[stops.length - 1];
+      if (!finalStop) return;
+      const timelineBounds = timeline.getBoundingClientRect();
+      const finalStopBounds = finalStop.getBoundingClientRect();
+      measuredRouteHeight =
+        finalStopBounds.top - timelineBounds.top + finalStopBounds.height / 2;
+      setRouteHeight(measuredRouteHeight);
+
+      const activeStop = stops[lastStopRef.current];
+      if (!activeStop) return;
+      const activeStopBounds = activeStop.getBoundingClientRect();
+      const activeCenter =
+        activeStopBounds.top - timelineBounds.top + activeStopBounds.height / 2;
+      const offset = Math.max(0, activeCenter - 24);
+      setWalkerOffset(offset);
+      setWalkerProgress(
+        Math.min(1, offset / Math.max(1, measuredRouteHeight - 24)),
+      );
+    };
+
+    updateRouteHeight();
+    const resizeObserver = new ResizeObserver(updateRouteHeight);
+    resizeObserver.observe(timeline);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
+        if (visibleEntries.length === 0) return;
+
+        const viewportMiddle = window.innerHeight / 2;
+        const activeEntry = visibleEntries.reduce((nearest, entry) => {
+          const nearestDistance = Math.abs(
+            nearest.boundingClientRect.top +
+              nearest.boundingClientRect.height / 2 -
+              viewportMiddle,
+          );
+          const entryDistance = Math.abs(
+            entry.boundingClientRect.top +
+              entry.boundingClientRect.height / 2 -
+              viewportMiddle,
+          );
+          return entryDistance < nearestDistance ? entry : nearest;
+        });
+        const stopIndex = Number(
+          activeEntry.target.getAttribute("data-career-stop"),
+        );
+        if (!Number.isInteger(stopIndex) || stopIndex === lastStopRef.current) {
+          return;
+        }
+
+        const previousStop = lastStopRef.current;
+        lastStopRef.current = stopIndex;
+        const timelineBounds = timeline.getBoundingClientRect();
+        const stopBounds = activeEntry.target.getBoundingClientRect();
+        const stopCenter =
+          stopBounds.top - timelineBounds.top + stopBounds.height / 2;
+        const offset = Math.max(0, stopCenter - 24);
+
+        setWalkerOffset(offset);
+        setWalkerProgress(
+          Math.min(1, offset / Math.max(1, measuredRouteHeight - 24)),
+        );
+
+        if (previousStop >= 0) {
+          setIsWalking(true);
+          window.clearTimeout(movementTimer);
+          movementTimer = window.setTimeout(() => setIsWalking(false), 640);
+        }
+      },
+      { threshold: 0, rootMargin: "-44% 0px -44% 0px" },
+    );
+
+    stops.forEach((stop) => observer.observe(stop));
+
+    return () => {
+      observer.disconnect();
+      resizeObserver.disconnect();
+      window.clearTimeout(movementTimer);
+    };
+  }, []);
+
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-black">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen bg-background">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-16">
@@ -82,144 +207,138 @@ export function Experience() {
           </p>
         </div>
 
-        {/* Industry Experience Highlights Dashboard */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+        <div className="mb-14 grid grid-cols-2 gap-x-0 gap-y-5 border-y border-white/10 py-5 md:grid-cols-4">
           {[
             {
               label: "Years in Industry",
-              val: "3+ Yrs",
+              val: formatExperienceYears("2019-12-01"),
               desc: "Enterprise Engineering",
-              color: "from-primary/20 to-primary/5 border-primary/30",
             },
             {
               label: "Global Enterprise",
               val: "BofA",
               desc: "Bank of America",
-              color: "from-accent/20 to-accent/5 border-accent/30",
             },
             {
               label: "Systems Engineer",
               val: "Infosys",
               desc: "Cloud & Data Pipelines",
-              color: "from-secondary/20 to-secondary/5 border-secondary/30",
             },
             {
               label: "Core Stack",
               val: "Java/Py",
               desc: "Full Stack & DevOps",
-              color: "from-primary/20 to-secondary/5 border-primary/30",
             },
           ].map((stat, i) => (
             <div
               key={i}
-              className={`p-5 rounded-2xl bg-gradient-to-br ${stat.color} border border-white/10 backdrop-blur-md hover:scale-[1.02] transition-transform duration-300 flex flex-col justify-between`}
+              className="flex flex-col justify-between border-l border-white/10 py-2 pl-4 first:border-l-0 first:pl-0 sm:py-3"
             >
-              <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 {stat.label}
               </span>
               <div className="my-2">
-                <span className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                <span className="text-xl font-semibold text-foreground sm:text-2xl">
                   {stat.val}
                 </span>
               </div>
-              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">
+              <span className="text-[10px] font-medium text-muted-foreground sm:text-xs">
                 {stat.desc}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical line: Pulsing gradient line */}
-          <div className="absolute left-6 md:left-8 top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary via-accent to-secondary opacity-40 animate-pulse"></div>
+        <div ref={timelineRef} className="career-path relative">
+          <div
+            className="career-path__track"
+            style={{ height: `${routeHeight}px` }}
+            aria-hidden="true"
+          >
+            <span className="career-path__line" />
+            <span
+              className="career-path__progress"
+              style={{ transform: `scaleY(${walkerProgress})` }}
+            />
+            <span
+              className={`career-walker${isWalking ? " is-walking" : ""}`}
+              style={{
+                transform: `translate3d(-50%, ${walkerOffset}px, 0)`,
+              }}
+            >
+              <span className="career-walker__figure">
+                <PersonStanding className="career-walker__person" />
+                <LaptopMinimal className="career-walker__laptop" />
+              </span>
+            </span>
+          </div>
 
-          <div className="space-y-12">
-            {experiences.map((exp) => (
-              <div key={exp.id} className="relative pl-14 md:pl-24 group/item">
-                {/* Timeline dot: Dual-ring pulsing */}
-                <div className="absolute left-0 md:left-2 top-2 w-12 h-12 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center ring-4 ring-black z-10 transition-all duration-500 group-hover/item:border-primary/50 group-hover/item:scale-110">
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 ${
-                      exp.isCurrent
-                        ? "bg-gradient-to-r from-primary via-accent to-secondary shadow-lg shadow-primary/40"
-                        : "bg-slate-900 border border-white/20"
-                    }`}
-                  >
-                    <Briefcase className="w-3.5 h-3.5 text-white" />
-                  </div>
-                </div>
+          <div className="space-y-10 sm:space-y-14">
+            {timelineExperiences.map((exp, index) => (
+              <div
+                key={exp.id}
+                className="career-stop group/item relative pl-14 md:pl-24"
+              >
+                <span
+                  className="career-waypoint"
+                  data-career-stop={index}
+                  aria-hidden="true"
+                >
+                  <span className="career-waypoint__point" />
+                </span>
 
-                {/* Card */}
-                <Card className="border border-white/10 bg-slate-950/40 backdrop-blur-xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-500 group transform hover:-translate-y-1.5 rounded-3xl">
-                  <div className="grid md:grid-cols-12 h-full">
-                    {/* Left Side: Brand Panel */}
-                    <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white/[0.02] to-white/[0.04] relative overflow-hidden text-center border-b md:border-b-0 md:border-r border-white/10 min-h-[160px]">
-                      {/* Interactive light ray */}
-                      <div className="absolute -inset-x-20 -inset-y-40 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-3xl pointer-events-none"></div>
-                      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-
-                      <div className="relative z-10">
-                        <Briefcase className="w-12 h-12 text-primary/80 mx-auto mb-4 group-hover:scale-110 group-hover:text-primary transition-all duration-300" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-2 block">
-                          {exp.company}
-                        </span>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white font-semibold shadow-inner mb-2">
-                          <Calendar className="w-3 h-3 text-accent" />
-                          {exp.period}
+                <Card className="career-entry overflow-hidden rounded-lg border border-white/10 bg-[#151915] transition-colors duration-300 hover:border-primary/30">
+                  <div className="grid md:grid-cols-[15rem_minmax(0,1fr)]">
+                    <div className="career-entry__meta border-b border-white/10 p-5 md:border-b-0 md:border-r md:p-6">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+                        Career stop {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className="mt-3 text-lg font-semibold leading-snug text-foreground">
+                        {exp.title}
+                      </h3>
+                      <p className="mt-1 text-sm font-medium text-muted-foreground">
+                        {exp.company}
+                      </p>
+                      <div className="mt-5 space-y-2 text-xs text-muted-foreground">
+                        <div className="flex items-start gap-2">
+                          <Calendar className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/80" />
+                          <span>{exp.period}</span>
                         </div>
-                        <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground font-medium mt-1">
-                          <MapPin className="w-3 h-3 text-secondary" />
-                          {exp.location}
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-primary/80" />
+                          <span>{exp.location}</span>
                         </div>
                       </div>
+                      {exp.isCurrent && (
+                        <Badge className="mt-5 border border-primary/20 bg-primary/10 text-xs font-medium text-primary">
+                          Current role
+                        </Badge>
+                      )}
                     </div>
 
-                    {/* Right Side: Details */}
-                    <div className="md:col-span-8 p-6 md:p-8 flex flex-col justify-center bg-slate-950/20">
-                      <div className="flex flex-wrap items-center gap-3 mb-2">
-                        <h3 className="text-xl sm:text-2xl font-extrabold text-white group-hover:text-primary transition-colors duration-300">
-                          {exp.title}
-                        </h3>
-                        {exp.isCurrent && (
-                          <span className="relative flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                          </span>
-                        )}
-                        {exp.isCurrent && (
-                          <Badge className="bg-gradient-to-r from-primary via-accent to-secondary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md">
-                            Active Role
-                          </Badge>
-                        )}
+                    <div className="p-5 md:p-7">
+                      <div className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                        <Briefcase className="h-4 w-4 text-primary" />
+                        Selected impact
                       </div>
-
-                      <div className="w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-full mb-6"></div>
-
-                      {/* Description List with Lucide Icons */}
-                      <ul className="space-y-4 mb-6">
-                        {exp.description.map((item, idx) => (
+                      <ul className="mb-6 space-y-3">
+                        {exp.description.map((item, itemIndex) => (
                           <li
-                            key={idx}
-                            className="flex items-start gap-3 text-sm text-muted-foreground leading-relaxed group/li"
+                            key={itemIndex}
+                            className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground"
                           >
-                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 group-hover/item:bg-primary/20 transition-colors">
-                              <Terminal className="w-3 h-3 text-primary" />
-                            </span>
-                            <span className="group-hover/li:text-white transition-colors duration-200">
-                              {item}
-                            </span>
+                            <span className="career-entry__bullet mt-2 shrink-0" />
+                            <span>{item}</span>
                           </li>
                         ))}
                       </ul>
 
-                      {/* Technology Tags */}
-                      <div className="flex flex-wrap gap-2 pt-5 border-t border-white/5">
+                      <div className="flex flex-wrap gap-2 border-t border-white/10 pt-4">
                         {exp.technologies.map((tech) => (
                           <Badge
                             key={tech}
                             variant="secondary"
-                            className="bg-white/5 text-muted-foreground border border-white/10 hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-all duration-300 text-xs font-semibold px-3 py-1 rounded-full cursor-default"
+                            className="rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-muted-foreground"
                           >
                             {tech}
                           </Badge>
