@@ -1,10 +1,368 @@
-import { ArrowDown, MapPin, Code, Palette, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  ArrowDown,
+  MapPin,
+  Code,
+  Palette,
+  Zap,
+  RotateCw,
+  ShieldCheck,
+  QrCode,
+  Sparkles,
+  Hand,
+  BookOpen,
+} from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import profileFull from "../assets/profile-full.png";
+import { smoothScrollToSection } from "../utils/smoothScroll";
+
+const GLYPHS = "!<>-_\\/[]{}—=+*^?#________0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+// Helper component for Animmaster-style 3D split character animations
+function SplitCharText({
+  text,
+  className = "",
+  staggerDelay = 0.03,
+  hoverable = true,
+}: {
+  text: string;
+  className?: string;
+  staggerDelay?: number;
+  hoverable?: boolean;
+}) {
+  return (
+    <span className={`inline-block ${className}`}>
+      {text.split("").map((char, index) => {
+        if (char === " ") {
+          return <span key={index} className="inline-block">&nbsp;</span>;
+        }
+        return (
+          <span
+            key={index}
+            className={`inline-block transition-transform duration-200 ${
+              hoverable
+                ? "hover:-translate-y-1 hover:scale-125 hover:rotate-3 hover:text-primary cursor-default"
+                : ""
+            }`}
+            style={{
+              animation: `char-roll-in 0.65s cubic-bezier(0.2, 0.85, 0.35, 1.15) ${
+                index * staggerDelay
+              }s backwards`,
+            }}
+          >
+            {char}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 export function Hero() {
   const [canPlayVideo, setCanPlayVideo] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [activeRole, setActiveRole] = useState("Full Stack Engineer");
+  const [activeRoleScrambled, setActiveRoleScrambled] = useState(
+    "Full Stack Engineer",
+  );
+  const [isDragging, setIsDragging] = useState(false);
+  const [storyChapter, setStoryChapter] = useState(0);
 
+  // Scramble states for ID Card
+  const [idNameScramble, setIdNameScramble] = useState("Ronu Skariah");
+  const [idCodeScramble, setIdCodeScramble] = useState("RS-2048-SEC");
+  const [idOrgScramble, setIdOrgScramble] = useState(
+    "Fintect (Dublin)",
+  );
+  const [idAuthScramble, setIdAuthScramble] = useState("8829-4109-7721");
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const lanyardRef = useRef<HTMLDivElement>(null);
+  const clipRef = useRef<HTMLDivElement>(null);
+  const glareRef = useRef<HTMLDivElement>(null);
+  const glareBackRef = useRef<HTMLDivElement>(null);
+
+  // Dynamic Physics State for Drag, Swing, and Pendulum Bounce
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const posRef = useRef<{ x: number; y: number; vx: number; vy: number }>({
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+  });
+  const animFrameRef = useRef<number | null>(null);
+  const lastMousePosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const lastMoveTimeRef = useRef<number>(0);
+
+  // Cyber Decrypt utility
+  const runScramble = useCallback(
+    (
+      targetText: string,
+      setter: (val: string) => void,
+      speed = 25,
+      step = 1 / 2,
+    ) => {
+      const length = targetText.length;
+      let iteration = 0;
+      const interval = setInterval(() => {
+        setter(
+          targetText
+            .split("")
+            .map((char, index) => {
+              if (char === " ") return " ";
+              if (index < iteration) return targetText[index];
+              return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+            })
+            .join(""),
+        );
+
+        if (iteration >= length) {
+          clearInterval(interval);
+          setter(targetText);
+        }
+        iteration += step;
+      }, speed);
+    },
+    [],
+  );
+
+  // Handle Role Selection
+  const handleSelectRole = (role: string) => {
+    setActiveRole(role);
+    runScramble(role, setActiveRoleScrambled, 28, 1 / 2);
+  };
+
+  // Flip Card with dynamic reverse side decryption
+  const handleFlipCard = (flipState: boolean) => {
+    setIsFlipped(flipState);
+    if (flipState) {
+      setTimeout(() => {
+        runScramble("Fintect (Dublin)", setIdOrgScramble, 22, 1 / 2);
+        runScramble("8829-4109-7721", setIdAuthScramble, 20, 1 / 3);
+      }, 250);
+    } else {
+      setTimeout(() => {
+        runScramble("Ronu Skariah", setIdNameScramble, 25, 1 / 2);
+        runScramble("RS-2048-SEC", setIdCodeScramble, 22, 1 / 2);
+      }, 250);
+    }
+  };
+
+  // Natural Pendulum Bounce & Oscillation Loop (Damped harmonic oscillator)
+  const runSpringBounce = useCallback((initialVx = 0, initialVy = 0) => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+
+    if (initialVx !== 0 || initialVy !== 0) {
+      posRef.current.vx = initialVx;
+      posRef.current.vy = initialVy;
+    }
+
+    const k = 0.078; // Spring restoration
+    const damping = 0.918; // Atmospheric pendulum resistance
+
+    const step = () => {
+      const state = posRef.current;
+
+      const ax = -k * state.x;
+      const ay = -k * state.y;
+
+      state.vx = (state.vx + ax) * damping;
+      state.vy = (state.vy + ay) * damping;
+
+      state.x += state.vx;
+      state.y += state.vy;
+
+      const card = cardRef.current;
+      const lanyard = lanyardRef.current;
+
+      // Inverse Kinematics for Lanyard Strap & Card Top
+      const dx = state.x;
+      const dy = Math.max(20, state.y + 95);
+      const angleRad = Math.atan2(dx, dy);
+      const angleDeg = angleRad * (180 / Math.PI);
+      const currentDist = Math.hypot(dx, dy);
+      const scaleY = currentDist / 95;
+
+      // Card swings in the exact same direction as lanyard with natural inertia
+      const cardAngle = angleDeg + state.vx * 0.35;
+      const rotY = state.x * 0.16 + state.vx * 0.4;
+      const rotX = -state.y * 0.16 - state.vy * 0.4;
+
+      if (card) {
+        card.style.transform = `perspective(1200px) translate3d(${state.x}px, ${state.y}px, 50px) rotateZ(${cardAngle}deg) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+      }
+      if (lanyard) {
+        lanyard.style.transform = `translateX(-50%) translateZ(20px) rotateZ(${angleDeg}deg) scaleY(${scaleY})`;
+      }
+
+      // Stop condition when oscillator reaches resting equilibrium
+      if (
+        Math.abs(state.x) < 0.2 &&
+        Math.abs(state.vx) < 0.2 &&
+        Math.abs(state.y) < 0.2 &&
+        Math.abs(state.vy) < 0.2
+      ) {
+        state.x = 0;
+        state.y = 0;
+        state.vx = 0;
+        state.vy = 0;
+        if (card) {
+          card.style.transform =
+            "perspective(1200px) translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) rotateX(0deg)";
+        }
+        if (lanyard) {
+          lanyard.style.transform =
+            "translateX(-50%) translateZ(20px) rotateZ(0deg) scaleY(1)";
+        }
+        return;
+      }
+
+      animFrameRef.current = requestAnimationFrame(step);
+    };
+
+    animFrameRef.current = requestAnimationFrame(step);
+  }, []);
+
+  // Quick Nudge Action to bounce the badge
+  const triggerNudge = () => {
+    posRef.current.x = -65;
+    posRef.current.y = 25;
+    runSpringBounce(18, -6);
+  };
+
+  // Drag & Pointer Physics
+  const handlePointerDown = (clientX: number, clientY: number) => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: clientX - posRef.current.x,
+      y: clientY - posRef.current.y,
+    };
+    lastMousePosRef.current = { x: clientX, y: clientY };
+    lastMoveTimeRef.current = Date.now();
+  };
+
+  const handlePointerMove = (clientX: number, clientY: number) => {
+    if (dragStartRef.current) {
+      // Actively dragging the badge
+      const rawX = clientX - dragStartRef.current.x;
+      const rawY = clientY - dragStartRef.current.y;
+
+      const clampedX = Math.max(-190, Math.min(190, rawX));
+      const clampedY = Math.max(-110, Math.min(160, rawY));
+
+      const now = Date.now();
+      const dt = Math.max(1, now - lastMoveTimeRef.current);
+      const vx = ((clientX - lastMousePosRef.current.x) / dt) * 12;
+      const vy = ((clientY - lastMousePosRef.current.y) / dt) * 12;
+
+      lastMousePosRef.current = { x: clientX, y: clientY };
+      lastMoveTimeRef.current = now;
+
+      posRef.current = {
+        x: clampedX,
+        y: clampedY,
+        vx,
+        vy,
+      };
+
+      const card = cardRef.current;
+      const lanyard = lanyardRef.current;
+
+      // Inverse Kinematics for Lanyard Strap & Card Top
+      const dx = clampedX;
+      const dy = Math.max(20, clampedY + 95);
+      const angleRad = Math.atan2(dx, dy);
+      const angleDeg = angleRad * (180 / Math.PI);
+      const currentDist = Math.hypot(dx, dy);
+      const scaleY = currentDist / 95;
+
+      const cardAngle = angleDeg;
+      const rotY = clampedX * 0.16;
+      const rotX = -clampedY * 0.16;
+
+      if (card) {
+        card.style.transform = `perspective(1200px) translate3d(${clampedX}px, ${clampedY}px, 50px) rotateZ(${cardAngle}deg) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+      }
+      if (lanyard) {
+        lanyard.style.transform = `translateX(-50%) translateZ(20px) rotateZ(${angleDeg}deg) scaleY(${scaleY})`;
+      }
+    } else {
+      // Natural 3D Hover tilt when not dragging
+      const card = cardRef.current;
+      if (!card) return;
+
+      const rect = card.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const normX = Math.max(-1, Math.min(1, (x - centerX) / centerX));
+      const normY = Math.max(-1, Math.min(1, (y - centerY) / centerY));
+
+      const rotateX = normY * -12;
+      const rotateY = normX * 14;
+      const swayZ = normX * 4.5;
+
+      card.style.transform = `perspective(1200px) translate3d(0, 0, 0) rotateZ(${swayZ}deg) rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(1.02)`;
+
+      if (lanyardRef.current) {
+        lanyardRef.current.style.transform = `translateX(-50%) translateZ(20px) rotateZ(${swayZ}deg) scaleY(1)`;
+      }
+
+      const activeGlare = isFlipped ? glareBackRef.current : glareRef.current;
+      if (activeGlare) {
+        activeGlare.style.opacity = "0.65";
+        activeGlare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.4), transparent 60%)`;
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) return;
+    const card = cardRef.current;
+    const lanyard = lanyardRef.current;
+    if (card) {
+      card.style.transform =
+        "perspective(1200px) translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) rotateX(0deg)";
+    }
+    if (lanyard) {
+      lanyard.style.transform =
+        "translateX(-50%) translateZ(20px) rotateZ(0deg) scaleY(1)";
+    }
+    const glare1 = glareRef.current;
+    const glare2 = glareBackRef.current;
+    if (glare1) glare1.style.opacity = "0";
+    if (glare2) glare2.style.opacity = "0";
+  };
+
+  const handlePointerUp = () => {
+    if (dragStartRef.current) {
+      dragStartRef.current = null;
+      setIsDragging(false);
+      runSpringBounce();
+    }
+  };
+
+  // Window-level release listener so pointer release outside element is caught
+  useEffect(() => {
+    const onWindowPointerUp = () => {
+      if (dragStartRef.current) {
+        dragStartRef.current = null;
+        setIsDragging(false);
+        runSpringBounce();
+      }
+    };
+    window.addEventListener("mouseup", onWindowPointerUp);
+    window.addEventListener("touchend", onWindowPointerUp);
+    return () => {
+      window.removeEventListener("mouseup", onWindowPointerUp);
+      window.removeEventListener("touchend", onWindowPointerUp);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [runSpringBounce]);
+
+  // Preference checks
   useEffect(() => {
     const motionPreference = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -23,336 +381,298 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black">
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden bg-transparent text-foreground transition-colors duration-300">
       <style>{`
-        @keyframes badge-settle {
-          0% { transform: rotateZ(-9deg); }
-          24% { transform: rotateZ(6deg); }
-          44% { transform: rotateZ(-3.5deg); }
-          64% { transform: rotateZ(1.8deg); }
-          82% { transform: rotateZ(-0.7deg); }
-          100% { transform: rotateZ(0); }
-        }
-        @keyframes lanyard-settle {
-          0% { transform: translateX(-50%) rotateZ(-4deg); }
-          24% { transform: translateX(-50%) rotateZ(2.5deg); }
-          44% { transform: translateX(-50%) rotateZ(-1.5deg); }
-          64% { transform: translateX(-50%) rotateZ(0.8deg); }
-          82% { transform: translateX(-50%) rotateZ(-0.3deg); }
-          100% { transform: translateX(-50%) rotateZ(0); }
-        }
-        @keyframes fade-in-up {
-          from {
+        /* ANIMMASTER TEXT ANIMATION SUITE */
+        @keyframes char-roll-in {
+          0% {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(22px) rotateX(-90deg);
           }
-          to {
+          100% {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) rotateX(0deg);
           }
         }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out forwards;
-        }
-        .role-tag {
-          animation: fade-in-up 0.6s ease-out backwards;
-        }
-        .role-tag:nth-child(1) { animation-delay: 0.2s; }
-        .role-tag:nth-child(2) { animation-delay: 0.4s; }
-        .role-tag:nth-child(3) { animation-delay: 0.6s; }
 
-        .id-card-scene {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          perspective: 1400px;
-          transform-style: preserve-3d;
+        /* Continuous Shiny Liquid Shimmer */
+        @keyframes liquid-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
 
-        .id-card-lanyard {
-          position: absolute;
-          left: 50%;
-          top: -88px;
-          width: 8px;
-          height: 128px;
-          border-radius: 9999px;
-          transform: translateX(-50%);
-          transform-origin: 50% 0%;
-          animation: lanyard-settle 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) 0.25s;
-          transition: transform 650ms cubic-bezier(0.2, 0.85, 0.35, 1.15);
-          background: linear-gradient(90deg, #41483a 0%, #c5ef6b 48%, #41483a 100%);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
-        }
-
-        .id-card-lanyard::before {
-          content: '';
-          position: absolute;
-          inset: 10px 0 auto 0;
-          height: 72%;
-          background: repeating-linear-gradient(
-            180deg,
-            rgba(21, 25, 14, 0.35) 0px,
-            rgba(21, 25, 14, 0.35) 6px,
-            rgba(255, 255, 255, 0.08) 6px,
-            rgba(255, 255, 255, 0.08) 12px
+        .shiny-liquid-text {
+          background: linear-gradient(
+            90deg,
+            var(--foreground) 0%,
+            var(--primary) 35%,
+            #6B8BA6 65%,
+            var(--foreground) 100%
           );
-          opacity: 0.55;
-          border-radius: 9999px;
+          background-size: 200% auto;
+          color: transparent;
+          -webkit-background-clip: text;
+          background-clip: text;
+          animation: liquid-shimmer 7s linear infinite;
         }
 
-        .id-card-clip {
+        /* 3D Flowing Background Marquee */
+        .hero-flow-stage {
           position: absolute;
-          left: 50%;
-          top: -10px;
-          width: 28px;
-          height: 14px;
-          border-radius: 4px;
-          transform: translateX(-50%);
-          transform-origin: 50% 0%;
-          transition: transform 650ms cubic-bezier(0.2, 0.85, 0.35, 1.15);
-          border: 1px solid rgba(242, 244, 237, 0.78);
-          background: linear-gradient(180deg, #e1e4d9, #7a8271);
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
-          z-index: 3;
-        }
-
-        .id-card-clip::after {
-          content: '';
-          position: absolute;
-          left: 50%;
-          top: 11px;
-          width: 10px;
-          height: 10px;
-          transform: translateX(-50%);
-          border: 1px solid rgba(225, 228, 217, 0.85);
-          border-top: 0;
-          border-radius: 0 0 6px 6px;
-        }
-
-        .id-card-rotator {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          transform-origin: 50% 0%;
-          animation: badge-settle 1.8s cubic-bezier(0.22, 0.61, 0.36, 1);
-          transition: transform 650ms cubic-bezier(0.2, 0.85, 0.35, 1.15), filter 350ms ease;
-          transform-style: preserve-3d;
-        }
-
-        .id-card-scene:hover .id-card-rotator {
-          transform: rotateZ(4deg) rotateY(-2deg) rotateX(1deg);
-          filter: drop-shadow(0 18px 24px rgba(10, 14, 8, 0.35));
-        }
-
-        .id-card-scene:hover .id-card-lanyard {
-          transform: translateX(-50%) rotateZ(2deg);
-        }
-
-        .id-card-scene:hover .id-card-clip {
-          transform: translateX(-50%) rotateZ(2deg);
-        }
-
-        .id-card-shell {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          border-radius: 28px;
+          inset: -40px -100px;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.25);
-          background: linear-gradient(180deg, rgba(15,23,42,0.65) 0%, rgba(15,23,42,0.9) 24%, rgba(2,6,23,0.95) 100%);
-          backdrop-filter: blur(16px);
-          box-shadow: 0 24px 50px rgba(2, 6, 23, 0.6);
-        }
-
-        .id-card-header {
-          position: absolute;
-          inset: 0 0 auto 0;
-          height: 26%;
-          z-index: 3;
-          padding: 18px 18px 12px;
-          background: linear-gradient(180deg, rgba(2,6,23,0.96) 0%, rgba(15,23,42,0.7) 46%, rgba(15,23,42,0) 100%);
-          border-bottom: 1px solid rgba(148,163,184,0.18);
-        }
-
-        .id-card-header-inner {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-        }
-
-        .id-card-tag {
-          color: rgba(255,255,255,0.78);
-          font-size: 9px;
-          letter-spacing: 0.24em;
-          text-transform: uppercase;
-          font-weight: 700;
-        }
-
-        .id-card-mark {
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          border: 2px solid rgba(248, 113, 113, 0.9);
-          background: radial-gradient(circle at center, #191d19 0 30%, #c5ef6b 31% 54%, #191d19 55% 100%);
-          box-shadow: 0 0 10px rgba(197, 239, 107, 0.28);
-        }
-
-        .id-card-shell::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(197,239,107,0.18), rgba(255,255,255,0.05), rgba(0,0,0,0));
+          pointer-events: none;
+          perspective: 900px;
+          perspective-origin: 50% 50%;
           z-index: 1;
-          pointer-events: none;
-        }
-
-        .id-card-shell::after {
-          content: '';
-          position: absolute;
-          left: 18px;
-          right: 18px;
-          bottom: 12px;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
-          z-index: 2;
-          pointer-events: none;
-        }
-
-        .id-card-photo-wrap {
-          position: absolute;
-          inset: 0;
-          z-index: 2;
-          border-radius: 28px;
-          overflow: hidden;
-          background: rgba(15,23,42,0.4);
-        }
-
-        .id-card-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center center;
-          border-radius: 28px;
-          filter: saturate(1.08) contrast(1.05);
-        }
-
-        .id-card-team {
-          position: absolute;
-          right: 18px;
-          top: 56px;
-          z-index: 4;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 10px;
-          border-radius: 9999px;
-          background: rgba(15,23,42,0.58);
-          border: 1px solid rgba(255,255,255,0.15);
-          color: rgba(255,255,255,0.82);
-          font-size: 9px;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-        }
-
-        .id-card-team-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #34d399, #22c55e);
-          box-shadow: 0 0 12px rgba(52,211,153,0.7);
-        }
-
-        .id-card-name {
-          position: absolute;
-          left: 20px;
-          right: 18px;
-          bottom: 68px;
-          z-index: 4;
           display: flex;
           flex-direction: column;
-          gap: 4px;
-        }
-
-        .id-card-name strong {
-          display: block;
-          color: white;
-          font-size: 18px;
-          letter-spacing: 0.05em;
-          line-height: 1.2;
-        }
-
-        .id-card-name span {
-          display: block;
-          color: rgba(242,244,237,0.78);
-          font-size: 9px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-        }
-
-        .id-card-meta {
-          position: absolute;
-          left: 20px;
-          right: 82px;
-          bottom: 18px;
-          z-index: 4;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px 16px;
-          padding-top: 12px;
-          border-top: 1px solid rgba(255,255,255,0.12);
-        }
-
-        .id-card-meta-label {
-          color: rgba(148,163,184,0.9);
-          font-size: 8px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-        }
-
-        .id-card-meta-value {
-          margin-top: 3px;
-          color: rgba(255,255,255,0.88);
-          font-size: 10px;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
-        .id-card-micro-bar {
-          position: absolute;
-          right: 18px;
-          bottom: 20px;
-          width: 54px;
-          height: 54px;
-          border-radius: 12px;
-          border: 1px solid rgba(255,255,255,0.15);
-          background: linear-gradient(135deg, rgba(15,23,42,0.7), rgba(30,41,59,0.9));
-          display: flex;
-          align-items: center;
           justify-content: center;
-          z-index: 4;
+          gap: 28px;
+          opacity: 0.18;
+          transform: rotateX(18deg) rotateZ(-7deg) scale(1.18);
         }
 
-        .id-card-micro-bar::before {
-          content: '';
-          width: 42px;
-          height: 42px;
-          border-radius: 8px;
-          background: repeating-linear-gradient(
-            90deg,
-            rgba(255,255,255,0.7) 0px,
-            rgba(255,255,255,0.7) 2px,
-            rgba(15,23,42,0.5) 2px,
-            rgba(15,23,42,0.5) 4px
+        .dark .hero-flow-stage {
+          opacity: 0.14;
+        }
+
+        @keyframes flow-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        @keyframes flow-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+
+        .hero-flow-row {
+          display: flex;
+          white-space: nowrap;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          line-height: 1;
+          user-select: none;
+        }
+
+        .flow-row-1 {
+          animation: flow-left 30s linear infinite;
+          font-size: clamp(3rem, 6vw, 5.5rem);
+          -webkit-text-stroke: 1px var(--primary);
+          color: var(--primary);
+          opacity: 0.25;
+        }
+
+        .flow-row-2 {
+          animation: flow-right 34s linear infinite;
+          font-size: clamp(2.5rem, 5vw, 4.5rem);
+          color: var(--foreground);
+          opacity: 0.28;
+        }
+
+        .flow-row-3 {
+          animation: flow-left 26s linear infinite;
+          font-size: clamp(2.8rem, 5.5vw, 5rem);
+          -webkit-text-stroke: 1px var(--primary);
+          color: var(--primary);
+          opacity: 0.25;
+        }
+
+        /* 3D Subtle Foil Effect */
+        .holo-shimmer {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(66, 106, 140, 0.15) 25%,
+            rgba(82, 96, 109, 0.18) 50%,
+            rgba(127, 156, 181, 0.15) 75%,
+            rgba(255, 255, 255, 0) 100%
           );
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+          background-size: 200% 200%;
+          mix-blend-mode: overlay;
+          pointer-events: none;
+        }
+
+        .glare-overlay {
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.25s ease;
+          mix-blend-mode: color-dodge;
+          z-index: 30;
+        }
+
+        /* 3D ID Card Physics */
+        .id-3d-scene {
+          perspective: 1200px;
+          transform-style: preserve-3d;
+          position: relative;
+          user-select: none;
+        }
+
+        .id-3d-card-body {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          transform-style: preserve-3d;
+          transform-origin: 50% 0%;
+          will-change: transform;
+        }
+
+        .id-3d-flipper {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          transform-style: preserve-3d;
+          transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .id-3d-card-body.flipped .id-3d-flipper {
+          transform: rotateY(180deg);
+        }
+
+        .id-3d-face {
+          position: absolute;
+          inset: 0;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          transform-style: preserve-3d;
+          border-radius: 28px;
+          overflow: hidden;
+        }
+
+        /* 3D Depth Planes */
+        .depth-photo {
+          transform: translateZ(28px);
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+        }
+
+        .depth-text {
+          transform: translateZ(40px);
+        }
+
+        .depth-badge {
+          transform: translateZ(52px);
+        }
+
+        /* Physical Lanyard & Clip with Synchronous Pivot Alignment */
+        .id-3d-lanyard {
+          position: absolute;
+          left: 50%;
+          top: -115px;
+          width: 14px;
+          height: 95px;
+          transform: translateX(-50%) translateZ(20px);
+          background: linear-gradient(
+            90deg,
+            #1e293b 0%,
+            var(--primary) 30%,
+            var(--primary) 70%,
+            #1e293b 100%
+          );
+          border-radius: 4px 4px 2px 2px;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+          z-index: 10;
+          transform-origin: 50% 0%;
+          will-change: transform;
+          pointer-events: none;
+        }
+
+        .id-3d-lanyard::before {
+          content: "";
+          position: absolute;
+          top: -5px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 22px;
+          height: 8px;
+          background: #334155;
+          border-radius: 4px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .id-3d-clip {
+          position: absolute;
+          left: 50%;
+          top: -18px;
+          width: 34px;
+          height: 24px;
+          transform: translateX(-50%) translateZ(25px);
+          background: linear-gradient(180deg, #e2e8f0 0%, #94a3b8 50%, #475569 100%);
+          border: 1px solid rgba(255, 255, 255, 0.7);
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+          z-index: 25;
+          pointer-events: none;
+        }
+
+        .id-3d-clip::before {
+          content: "";
+          position: absolute;
+          top: -9px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 14px;
+          height: 11px;
+          border: 2.5px solid #cbd5e1;
+          border-radius: 50% 50% 0 0;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .id-3d-clip::after {
+          content: "";
+          position: absolute;
+          bottom: 3px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 16px;
+          height: 3px;
+          background: #1e293b;
+          border-radius: 2px;
+        }
+
+        /* Animmaster Kinetic Button Text Rolling Effect */
+        .btn-kinetic {
+          overflow: hidden;
+          position: relative;
+        }
+        .btn-kinetic span {
+          display: inline-block;
+          transition: transform 0.3s cubic-bezier(0.2, 0.85, 0.35, 1.15);
+        }
+        .btn-kinetic:hover span {
+          transform: translateY(-2px) scale(1.04);
         }
       `}</style>
 
-      {/* Video Background - Reduced Blur to make it more visible */}
+      {/* 1. 3D FLOWING BACKGROUND TEXT STREAM */}
+      <div className="hero-flow-stage" aria-hidden="true">
+        <div className="hero-flow-row flow-row-1">
+          <span>
+            FULL STACK ENGINEER ✦ SPRING BOOT ✦ REACT ✦ PYTHON ✦ HIGH-VOLUME
+            APIS ✦ DUBLIN ✦ KERALA ✦ FULL STACK ENGINEER ✦ SPRING BOOT ✦ REACT ✦
+            PYTHON ✦
+          </span>
+        </div>
+        <div className="hero-flow-row flow-row-2">
+          <span>
+            ARCHITECTING SCALABLE SYSTEMS ✦ OAUTH 2.0 ✦ AWS EC2 ✦ AZURE OPENAI
+            ✦ AIRFLOW ✦ ARCHITECTING SCALABLE SYSTEMS ✦ OAUTH 2.0 ✦ AWS EC2 ✦
+          </span>
+        </div>
+        <div className="hero-flow-row flow-row-3">
+          <span>
+            RONU SKARIAH ✦ BANK OF AMERICA ✦ INFOSYS ✦ DATA ANALYTICS ✦ COMPUTER
+            SCIENCE ✦ RONU SKARIAH ✦ BANK OF AMERICA ✦ INFOSYS ✦
+          </span>
+        </div>
+      </div>
+
+      {/* Background Video Support - Crisper and clearly visible in both light & dark modes */}
       <video
         autoPlay={canPlayVideo}
         loop
@@ -361,211 +681,447 @@ export function Hero() {
         preload={canPlayVideo ? "metadata" : "none"}
         poster={profileFull}
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover blur-[5px] opacity-80"
+        className="absolute inset-0 w-full h-full object-cover blur-[3px] opacity-65 dark:opacity-45 pointer-events-none z-[2] transition-opacity duration-500"
       >
         {canPlayVideo && <source src="/videos/my-video.mp4" type="video/mp4" />}
       </video>
 
-      {/* Lighter Cinematic gradient overlay for improved video visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/50 pointer-events-none" />
+      {/* Balanced Cinematic Gradient Mask allowing video & flowing text to shine through */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/35 to-background/80 dark:from-background/90 dark:via-background/60 dark:to-background/95 pointer-events-none z-[3] transition-colors duration-500" />
 
-      {/* Content Container with Grid and Parallax */}
+      {/* Main Foreground Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-16 sm:py-24 md:py-32">
-        <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-center w-full">
+        <div className="flex flex-col md:grid md:grid-cols-12 gap-8 lg:gap-14 items-center w-full">
           {/* Left Column: Text & Info Content */}
-          <div className="w-full md:col-span-7 text-left space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in-up">
-            {/* Top Row on Mobile: Name & Video Side-by-Side */}
-            <div className="flex md:block items-center justify-between gap-4 w-full">
-              <div className="space-y-3 sm:space-y-6 flex-1">
-                {/* Location Pill */}
-                <div>
-                  <div className="relative inline-flex items-center gap-1.5 sm:gap-3 px-3 py-1.5 sm:px-5 sm:py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:bg-white/15 transition-all duration-300">
-                    <div className="relative w-1.5 h-1.5 sm:w-2 sm:h-2">
-                      <div className="absolute inset-0 bg-emerald-400 rounded-full"></div>
-                      <div className="absolute inset-0 bg-emerald-400 rounded-full animate-pulse"></div>
-                    </div>
-                    <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                    <span className="text-[10px] sm:text-sm font-medium text-white">
-                      From Kottayam, Kerala
-                    </span>
-                  </div>
-                </div>
+          <div className="w-full md:col-span-7 text-left space-y-6 sm:space-y-7">
+            {/* Location Pill */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-xs sm:text-sm font-semibold text-primary shadow-sm hover:bg-primary/15 transition-all">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                <MapPin className="w-3.5 h-3.5 text-primary" />
+                <SplitCharText
+                  text="From Kottayam, Kerala • Based in Dublin"
+                  hoverable={false}
+                  staggerDelay={0.015}
+                />
+              </div>
+            </div>
 
-                {/* Title Name */}
-                <div className="space-y-2">
-                  <h1 className="text-2xl sm:text-4xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight sm:leading-none">
-                    Hi, I'm <br />
-                    <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                      Ronu Skariah
-                    </span>
-                  </h1>
-                </div>
+            {/* Headline with 3D Split Character Stagger & Liquid Shimmer */}
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.08]">
+                <SplitCharText
+                  text="Hi, I'm"
+                  className="block text-muted-foreground"
+                  staggerDelay={0.04}
+                />
+                <span className="shiny-liquid-text block">
+                  <SplitCharText text="Ronu Skariah" staggerDelay={0.035} />
+                </span>
+              </h1>
+            </div>
 
-                {/* Role Tags */}
-                <div className="flex flex-wrap gap-1.5 sm:gap-3">
+            {/* Kinetic Decrypt Role Badges */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { role: "Full Stack Engineer", icon: Code },
+                  { role: "Product Designer", icon: Palette },
+                  { role: "Creative Thinker", icon: Zap },
+                ].map(({ role, icon: IconComponent }, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSelectRole(role)}
+                    className={`group px-3.5 py-2 sm:px-4 sm:py-2 rounded-full border text-xs sm:text-sm font-semibold backdrop-blur-md shadow-sm transition-all flex items-center gap-2 cursor-pointer ${
+                      activeRole === role
+                        ? "bg-primary text-primary-foreground border-primary shadow-primary/20 scale-105"
+                        : "bg-card border-border hover:border-primary/50 text-foreground hover:-translate-y-0.5"
+                    }`}
+                  >
+                    <IconComponent
+                      className={`w-3.5 h-3.5 transition-transform ${
+                        activeRole === role
+                          ? "rotate-12"
+                          : "text-primary group-hover:rotate-12"
+                      }`}
+                    />
+                    <SplitCharText
+                      text={role}
+                      staggerDelay={0.015}
+                      hoverable={false}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {/* Dynamic Cyber Decrypt Banner */}
+              <div className="p-3.5 rounded-xl bg-card border border-primary/25 shadow-sm max-w-lg flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                    Active Focus:
+                  </span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-primary tracking-wide">
+                    {activeRoleScrambled}
+                  </span>
+                </div>
+                <button
+                  onClick={() =>
+                    runScramble(
+                      activeRole,
+                      setActiveRoleScrambled,
+                      26,
+                      1 / 2,
+                    )
+                  }
+                  className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-colors cursor-pointer"
+                  title="Re-run text decrypt"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Professional Summary Storytelling Console */}
+            <div className="relative rounded-2xl border border-primary/25 bg-card/80 dark:bg-[#121612]/80 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-4 max-w-xl group/story overflow-hidden transition-all duration-300 hover:border-primary/40">
+              {/* Top specular glow */}
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent pointer-events-none" />
+              <div className="absolute -top-16 -right-16 w-36 h-36 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Console Header & Chapter Switcher */}
+              <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase font-bold text-primary flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    Story Chapter 0{storyChapter + 1} / 03
+                  </span>
+                </div>
+                {/* Chapter Selection Pills */}
+                <div className="flex items-center gap-1">
                   {[
-                    { role: "Full Stack Engineer", icon: Code },
-                    { role: "Product Designer", icon: Palette },
-                    { role: "Creative Thinker", icon: Zap },
-                  ].map(({ role, icon: IconComponent }, i) => (
-                    <span
-                      key={i}
-                      className="role-tag px-2.5 py-1 sm:px-4 sm:py-2 rounded-full bg-white/10 border border-white/20 text-[9px] sm:text-sm font-semibold text-white backdrop-blur-md hover:bg-white/20 hover:border-white/40 transition-all duration-300 cursor-default flex items-center gap-1 sm:gap-2"
+                    { id: 0, label: "01 Core" },
+                    { id: 1, label: "02 Craft" },
+                    { id: 2, label: "03 Cloud" },
+                  ].map((ch) => (
+                    <button
+                      key={ch.id}
+                      onClick={() => setStoryChapter(ch.id)}
+                      className={`px-2.5 py-1 text-[10px] font-mono rounded-lg transition-all cursor-pointer ${
+                        storyChapter === ch.id
+                          ? "bg-primary text-primary-foreground font-bold shadow-sm scale-105"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      }`}
                     >
-                      <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {role}
-                    </span>
+                      {ch.label}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Profile Picture: Mobile Only side-by-side */}
-              <div
-                className="block md:hidden shrink-0 animate-fade-in-up"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <div className="id-card-scene relative w-[120px] aspect-[4/5]">
-                  <div className="id-card-lanyard" />
-                  <div className="id-card-clip" />
-                  <div className="id-card-rotator w-full h-full">
-                    <div className="id-card-shell w-full h-full">
-                      <div className="id-card-header">
-                        <div className="id-card-header-inner">
-                          <span className="id-card-tag">Corporate ID</span>
-                          <span className="id-card-mark" />
-                        </div>
-                      </div>
-                      <div className="id-card-photo-wrap">
-                        <img
-                          src={profileFull}
-                          alt="Ronu Skariah"
-                          className="id-card-image"
-                        />
-                      </div>
-                      <div className="id-card-team">
-                        <span className="id-card-team-dot" />
-                        Verified
-                      </div>
+              {/* Active Chapter Narrative */}
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-mono font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/25">
+                    {storyChapter === 0
+                      ? "Enterprise Banking Backbone"
+                      : storyChapter === 1
+                      ? "Full Stack Craft & Security"
+                      : "Cloud Pipelines & Growth"}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    {storyChapter === 0
+                      ? "Fintect • Dublin"
+                      : storyChapter === 1
+                      ? "React 19 • OAuth 2.0 • TypeScript"
+                      : "Infosys • NCI Data Analytics"}
+                  </span>
+                </div>
+
+                <h3 className="text-base sm:text-lg font-bold text-foreground leading-snug">
+                  {storyChapter === 0 && "Engineering High-Throughput Financial Backbones"}
+                  {storyChapter === 1 && "Merging Pixel-Perfect Craft with Zero-Trust Security"}
+                  {storyChapter === 2 && "From Big Data Orchestration to Production Mastery"}
+                </h3>
+
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  {storyChapter === 0 &&
+                    "At Fintect (Dublin), I architect resilient Java 17+ and Spring Boot microservices handling mission-critical feeds. From multi-threading concurrency to Hibernate Envers compliance auditing and zero-downtime Helm deployments, I transform financial complexity into bulletproof reliability."}
+                  {storyChapter === 1 &&
+                    "Code without human delight is only half-built. I craft responsive React and TypeScript architectures reinforced with enterprise OAuth 2.0 access control, modern Vite workflows, and fluid 60fps micro-interactions that make dense data workflows feel effortless."}
+                  {storyChapter === 2 &&
+                    "My engineering odyssey started with cloud ETL pipelines at Infosys across AWS and Azure, evolving through master's research in Data Analytics at NCI Dublin. My philosophy: automate every friction point, write self-documenting code, and build platforms engineered to outlast tomorrow."}
+                </p>
+              </div>
+
+              {/* Story Metric Telemetry Bar */}
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/40 text-center font-mono">
+                {(storyChapter === 0
+                  ? [
+                      { label: "P99 Latency", val: "< 50ms" },
+                      { label: "Platform SLA", val: "99.99%" },
+                      { label: "Daily Feeds", val: "10M+ Req" },
+                    ]
+                  : storyChapter === 1
+                  ? [
+                      { label: "Security", val: "OAuth 2.0" },
+                      { label: "Type Safety", val: "100% TS" },
+                      { label: "Frame Rate", val: "60 FPS" },
+                    ]
+                  : [
+                      { label: "ETL Speedup", val: "+40%" },
+                      { label: "Ecosystem", val: "AWS / Azure" },
+                      { label: "Experience", val: "6+ Years" },
+                    ]
+                ).map((m, mIdx) => (
+                  <div
+                    key={mIdx}
+                    className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-border/40 hover:border-primary/30 transition-colors"
+                  >
+                    <div className="text-xs sm:text-sm font-black text-primary">
+                      {m.val}
+                    </div>
+                    <div className="text-[9px] text-muted-foreground uppercase tracking-tight">
+                      {m.label}
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Description */}
-            <p className="max-w-xl text-white/95 leading-relaxed text-xs sm:text-base lg:text-lg font-light">
-              I architect and build scalable, high-performance web applications
-              with a focus on elegant design and exceptional user experience.
-              Specializing in modern full-stack development, I transform complex
-              technical challenges into intuitive, production-grade solutions
-              that drive business value.
-            </p>
-
-            {/* Actions */}
-            <div className="flex flex-wrap gap-2 sm:gap-4 pt-2">
+            {/* Action Buttons with Kinetic Text */}
+            <div className="flex flex-wrap gap-3 pt-2">
               <button
-                onClick={() => {
-                  const el = document.getElementById("contact");
-                  if (el) {
-                    const offset = 64;
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const offsetPosition =
-                      elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-                className="px-4 py-2 sm:px-8 sm:py-3 rounded-full bg-gradient-to-r from-primary to-accent text-white text-xs sm:text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                onClick={() => smoothScrollToSection("contact", 1350)}
+                className="btn-kinetic px-6 py-2.5 sm:px-8 sm:py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm sm:text-base shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer"
               >
-                Get in Touch
+                <span>Get in Touch →</span>
               </button>
               <button
-                onClick={() => {
-                  const el = document.getElementById("experience");
-                  if (el) {
-                    const offset = 64;
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const offsetPosition =
-                      elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-                className="px-4 py-2 sm:px-8 sm:py-3 rounded-full bg-white/10 border border-white/20 text-white text-xs sm:text-base font-semibold hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                onClick={() => smoothScrollToSection("experience", 1350)}
+                className="btn-kinetic px-6 py-2.5 sm:px-8 sm:py-3 rounded-full bg-card border border-border hover:border-primary/40 text-foreground font-semibold text-sm sm:text-base hover:bg-muted/40 hover:-translate-y-0.5 transition-all cursor-pointer"
               >
-                View Experience
+                <span>View Experience</span>
               </button>
             </div>
           </div>
 
-          {/* Right Column: Premium Showcase Profile (Desktop Only) */}
-          <div
-            className="hidden md:flex md:col-span-5 justify-center lg:justify-end animate-fade-in-up"
-            style={{ animationDelay: "0.2s" }}
-          >
-            <div className="id-card-scene group w-full max-w-[300px] lg:max-w-[400px] aspect-[4/5] py-8">
-              <div className="id-card-lanyard" />
-              <div className="id-card-clip" />
-              <div className="id-card-rotator w-full h-full">
-                <div className="id-card-shell w-full h-full">
-                  <div className="id-card-header">
-                    <div className="id-card-header-inner">
-                      <span className="id-card-tag">Corporate ID</span>
-                      <span className="id-card-mark" />
+          {/* Right Column: 3D INTERACTIVE TANGIBLE CORPORATE ID CARD */}
+          <div className="w-full md:col-span-5 flex flex-col items-center lg:items-end justify-center py-6">
+            <div
+              className={`id-3d-scene w-full max-w-[310px] sm:max-w-[340px] aspect-[4/5.5] ${
+                isDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
+              onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
+              onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
+              onMouseUp={handlePointerUp}
+              onTouchStart={(e) => {
+                const touch = e.touches[0];
+                if (touch) handlePointerDown(touch.clientX, touch.clientY);
+              }}
+              onTouchMove={(e) => {
+                const touch = e.touches[0];
+                if (touch) handlePointerMove(touch.clientX, touch.clientY);
+              }}
+              onTouchEnd={handlePointerUp}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* Physical Lanyard anchored from top */}
+              <div className="id-3d-lanyard" ref={lanyardRef} />
+
+              {/* 3D Card Body with top-center pivot origin */}
+              <div
+                className={`id-3d-card-body ${isFlipped ? "flipped" : ""}`}
+                ref={cardRef}
+              >
+                {/* Metallic Clip clamped directly to card badge slot */}
+                <div className="id-3d-clip" ref={clipRef} />
+
+                <div className="id-3d-flipper">
+                  {/* FRONT FACE: Corporate Badge */}
+                  <div className="id-3d-face bg-gradient-to-br from-[#2D353E] via-[#20252B] to-[#181C21] text-[#FAFAFA] border border-[#426A8C]/30 shadow-2xl p-6 flex flex-col justify-between">
+                    <div className="glare-overlay" ref={glareRef} />
+                    <div className="absolute inset-0 holo-shimmer opacity-30" />
+
+                    {/* Top Row: Badge Header & Holographic Seal */}
+                    <div className="relative z-10 flex items-center justify-between depth-text">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
+                        <span className="text-[10px] font-mono tracking-widest uppercase font-bold text-primary flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          CORPORATE ID PASS
+                        </span>
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-primary via-[#5B86A9] to-[#8EAEC9] flex items-center justify-center text-[10px] font-black text-white shadow-md">
+                        RS
+                      </div>
+                    </div>
+
+                    {/* Photo & Identity with 3D Depth Elevation */}
+                    <div className="relative z-10 my-auto flex flex-col items-center text-center">
+                      <div className="relative w-36 h-36 rounded-2xl overflow-hidden depth-photo border-2 border-white/20 bg-slate-900 group">
+                        <img
+                          src={profileFull}
+                          alt="Ronu Skariah"
+                          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                        />
+                        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[9px] font-mono text-primary border border-white/10 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3 text-primary" />
+                          <span>Verified</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 depth-text space-y-1">
+                        <h3
+                          className="text-xl font-black text-white tracking-tight cursor-pointer hover:text-primary transition-colors font-mono"
+                          onMouseEnter={() =>
+                            runScramble("Ronu Skariah", setIdNameScramble, 22, 1 / 2)
+                          }
+                        >
+                          {idNameScramble}
+                        </h3>
+                        <p className="text-xs font-mono text-primary font-semibold">
+                          Full Stack Engineer
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Footer Row: Code & Flip Button */}
+                    <div className="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-xs depth-badge">
+                      <div>
+                        <span className="block text-[9px] font-mono text-slate-400 uppercase">
+                          ACCESS CODE
+                        </span>
+                        <span
+                          className="font-mono text-[11px] font-bold text-white tracking-wider cursor-pointer hover:text-primary transition-colors"
+                          onMouseEnter={() =>
+                            runScramble("RS-2048-SEC", setIdCodeScramble, 20, 1 / 2)
+                          }
+                        >
+                          {idCodeScramble}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFlipCard(true);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[11px] font-bold text-primary border border-white/15 flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 transition-all"
+                      >
+                        Flip ID ↻
+                      </button>
                     </div>
                   </div>
 
-                  <div className="id-card-photo-wrap">
-                    <img
-                      src={profileFull}
-                      alt="Ronu Skariah"
-                      className="id-card-image"
-                      style={{ objectPosition: "center center" }}
-                    />
-                  </div>
+                  {/* BACK FACE: Security Clearance & Organization */}
+                  <div
+                    className="id-3d-face bg-gradient-to-br from-[#20252B] via-[#1A1F24] to-[#14181B] text-[#FAFAFA] border border-[#426A8C]/40 shadow-2xl p-6 flex flex-col justify-between"
+                    style={{ transform: "rotateY(180deg)" }}
+                  >
+                    <div className="glare-overlay" ref={glareBackRef} />
 
-                  <div className="id-card-team">
-                    <span className="id-card-team-dot" />
-                    Verified
-                  </div>
-
-                  <div className="id-card-name">
-                    <strong>Ronu Skariah</strong>
-                    <span>Full Stack Engineer</span>
-                  </div>
-
-                  <div className="id-card-meta">
-                    <div>
-                      <div className="id-card-meta-label">Role</div>
-                      <div className="id-card-meta-value">Developer</div>
+                    <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3">
+                      <span className="text-xs font-mono text-primary font-bold">
+                        DIGITAL BADGE METRICS
+                      </span>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-primary/20 text-primary font-bold">
+                        ACTIVE DEPLOY
+                      </span>
                     </div>
-                    <div>
-                      <div className="id-card-meta-label">ID</div>
-                      <div className="id-card-meta-value">RS-2048</div>
+
+                    {/* Reverse Info Content with Cyber Decrypt */}
+                    <div className="relative z-10 space-y-3 font-mono text-xs text-slate-300">
+                      <div
+                        className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1 cursor-pointer hover:border-primary/40 transition-colors"
+                        onMouseEnter={() =>
+                          runScramble(
+                            "Fintect (Dublin)",
+                            setIdOrgScramble,
+                            20,
+                            1 / 2,
+                          )
+                        }
+                      >
+                        <div className="text-[10px] text-slate-400">
+                          ORGANIZATION
+                        </div>
+                        <div className="font-bold text-white tracking-wide">
+                          {idOrgScramble}
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
+                        <div className="text-[10px] text-slate-400">
+                          CLEARANCES & TECH
+                        </div>
+                        <div className="text-[11px] text-primary leading-relaxed">
+                          Core Java • Spring Boot • Microservices • React
+                        </div>
+                      </div>
+
+                      {/* Barcode & Mini QR simulation */}
+                      <div className="pt-2 flex items-center justify-between gap-3">
+                        <div
+                          className="space-y-1 cursor-pointer"
+                          onMouseEnter={() =>
+                            runScramble("8829-4109-7721", setIdAuthScramble, 18, 1 / 3)
+                          }
+                        >
+                          <div className="h-6 w-32 bg-[repeating-linear-gradient(90deg,#fff_0px,#fff_2px,#000_2px,#000_5px,#fff_5px,#fff_8px,#000_8px,#000_9px)] rounded opacity-80" />
+                          <span className="text-[9px] text-slate-400 font-mono">
+                            AUTH: {idAuthScramble}
+                          </span>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shrink-0 shadow-md">
+                          <QrCode className="w-8 h-8 text-black" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative z-10 pt-3 border-t border-white/10 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFlipCard(false);
+                        }}
+                        className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs cursor-pointer hover:scale-105 transition-all shadow-sm"
+                      >
+                        Flip Front
+                      </button>
                     </div>
                   </div>
-
-                  <div className="id-card-micro-bar" />
                 </div>
               </div>
+            </div>
+
+            {/* Interactive Physics Hint & Nudge Trigger */}
+            <div className="mt-4 flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-card border border-border text-[11px] font-medium text-muted-foreground shadow-sm">
+                <Hand className="w-3.5 h-3.5 text-primary animate-pulse" />
+                <span>Drag to swing badge • Release to bounce</span>
+              </div>
+              <button
+                type="button"
+                onClick={triggerNudge}
+                className="px-2.5 py-1 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 text-[11px] font-bold text-primary transition-all cursor-pointer"
+                title="Trigger a swing & bounce test"
+              >
+                Flick ⚡
+              </button>
             </div>
           </div>
         </div>
 
         {/* Scroll Indicator */}
-        <div
-          className="animate-fade-in-up pt-12 flex justify-center"
-          style={{ animationDelay: "0.5s" }}
-        >
-          <ArrowDown className="w-6 h-6 text-white opacity-80" />
+        <div className="pt-12 flex justify-center">
+          <ArrowDown className="w-6 h-6 text-muted-foreground animate-bounce" />
         </div>
       </div>
-
-      {/* Instructions box for adding video */}
     </section>
   );
 }

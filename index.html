@@ -8,8 +8,20 @@
       name="description"
       content="Ronu Skariah is a full-stack software engineer building scalable, thoughtful web applications."
     />
-    <meta name="theme-color" content="#111411" />
+    <meta name="theme-color" content="#20252B" />
     <title>Portfolio - Ronu Skariah</title>
+    <script>
+      (function () {
+        try {
+          const theme = localStorage.getItem("theme") || "dark";
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
 
   <body>

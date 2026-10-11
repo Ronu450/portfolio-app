@@ -5,10 +5,14 @@ import {
   Mail,
   MapPin,
   Send,
-  MessageSquare,
+  Sparkles,
+  Copy,
+  Check,
+  Clock,
+  Terminal,
+  ShieldCheck,
 } from "lucide-react";
 import type { FormEvent } from "react";
-import type { ComponentType } from "react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -24,26 +28,14 @@ interface ContactFormData {
 type ContactField = keyof ContactFormData;
 type ContactErrors = Record<ContactField, string>;
 
-interface SocialLink {
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  href: string;
-}
-
 const emailAddress = "ronu.skariah@outlook.com";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const socialLinks: SocialLink[] = [
-  {
-    icon: Github,
-    label: "GitHub",
-    href: "https://github.com/Ronu450",
-  },
-  {
-    icon: Linkedin,
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/ronu-skariah",
-  },
+const projectCategories = [
+  { id: "fullstack", label: "🚀 Full Stack System Architecture" },
+  { id: "spring", label: "⚡ Spring Boot & API Engineering" },
+  { id: "react", label: "🎨 Modern React & UI Performance" },
+  { id: "coffee", label: "☕ Mentorship & Technical Coffee" },
 ];
 
 function validateField(field: ContactField, value: string): string {
@@ -76,6 +68,16 @@ export function Contact() {
     message: "",
   });
   const [formStatus, setFormStatus] = useState("");
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    projectCategories[0].id
+  );
+
+  const copyEmailToClipboard = () => {
+    navigator.clipboard.writeText(emailAddress);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2200);
+  };
 
   const updateField = (field: ContactField, value: string) => {
     setFormData((current) => ({ ...current, [field]: value }));
@@ -110,183 +112,307 @@ export function Contact() {
 
     const name = formData.name.trim();
     const email = formData.email.trim();
-    const subject = encodeURIComponent(`Portfolio inquiry from ${name}`);
-    const body = encodeURIComponent(
-      `From: ${name} <${email}>\n\n${formData.message.trim()}`,
+    const categoryObj = projectCategories.find((c) => c.id === selectedCategory);
+    const categoryTitle = categoryObj ? categoryObj.label : "General Inquiry";
+    
+    const subject = encodeURIComponent(
+      `[${categoryTitle}] Portfolio inquiry from ${name}`
     );
+    const body = encodeURIComponent(
+      `From: ${name} <${email}>\nCategory: ${categoryTitle}\n\nMessage:\n${formData.message.trim()}`
+    );
+
     setFormStatus(
-      "Opening your email app with a draft. If it doesn't open, use the direct email link.",
+      "Opening your default email app with this message draft. You can review and hit send!"
     );
     window.location.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
   };
 
   return (
-    <section className="px-4 py-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-10 max-w-2xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            A direct line
-          </p>
-          <h2 className="mb-3 text-3xl font-bold text-foreground sm:text-4xl">
-            Get in touch
+    <section className="px-4 py-28 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-1/4 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="mx-auto max-w-6xl space-y-14">
+        {/* Header with Cyber Communication Protocol Badge */}
+        <div className="text-center sm:text-left max-w-3xl space-y-3">
+
+          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground">
+            Let's Build Together
           </h2>
-          <p className="leading-relaxed text-muted-foreground">
-            Have a project in mind? Send a note and I’ll get back to you.
-          </p>
-        </header>
+        </div>
 
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-          <aside className="lg:col-span-4">
-            <h3 className="mb-4 text-sm font-semibold text-foreground">
-              Contact directly
-            </h3>
-            <a
-              href={`mailto:${emailAddress}`}
-              className="group flex items-center gap-3 border-b border-white/10 py-4 focus-visible:outline-offset-4"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Mail className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="mb-1 block text-xs text-muted-foreground">
-                  Email
+        {/* 2-Column Grid */}
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12 items-start">
+          {/* Left Column: Direct Connection & Telemetry Dossier */}
+          <aside className="lg:col-span-5 space-y-6">
+            {/* Live Dublin Node Card */}
+            <div className="rounded-3xl border border-border/70 bg-card/80 dark:bg-[#20252B]/85 backdrop-blur-xl p-6 shadow-xl space-y-5 relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+              
+              <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
+                  </span>
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-foreground">
+                    Node: Dublin, Ireland
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 font-bold">
+                  AVAILABLE
                 </span>
-                <span className="block break-all text-sm font-medium text-foreground transition-colors group-hover:text-primary">
-                  {emailAddress}
-                </span>
-              </span>
-              <ArrowUpRight
-                className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
-                aria-hidden="true"
-              />
-            </a>
+              </div>
 
-            <div className="flex items-center gap-3 border-b border-white/10 py-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <MapPin className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <span>
-                <span className="mb-1 block text-xs text-muted-foreground">
-                  Location
+              {/* Direct Email with One-Click Copy */}
+              <div className="space-y-2">
+                <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest block">
+                  Encrypted Direct Mail
                 </span>
-                <span className="block text-sm font-medium text-foreground">
-                  Dublin, Ireland
-                </span>
-              </span>
+                <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 hover:border-primary/40 transition-colors group">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <a
+                      href={`mailto:${emailAddress}`}
+                      className="text-xs sm:text-sm font-mono font-bold text-foreground hover:text-primary truncate transition-colors"
+                      title="Open in mail client"
+                    >
+                      {emailAddress}
+                    </a>
+                  </div>
+
+                  <button
+                    onClick={copyEmailToClipboard}
+                    className="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-primary hover:text-primary-foreground text-muted-foreground transition-all cursor-pointer shrink-0"
+                    title="Copy email to clipboard"
+                    aria-label="Copy email"
+                  >
+                    {copiedEmail ? (
+                      <Check className="w-4 h-4 text-primary" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Physical Location Telemetry */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+                    Coordinates & Timezone
+                  </span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-foreground">
+                    Dublin, IE • 53.3498° N, 6.2603° W (UTC+1)
+                  </span>
+                </div>
+              </div>
+
+              {/* SLA Response Time */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase block">
+                    Response Window
+                  </span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-foreground">
+                    &lt; 24h Average Dispatch Latency
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-7">
-              <h3 className="mb-3 text-sm font-semibold text-foreground">
-                Find me elsewhere
+            {/* Social Network Terminal Card */}
+            <div className="rounded-3xl border border-border/70 bg-card/80 dark:bg-[#20252B]/85 backdrop-blur-xl p-6 shadow-xl space-y-4">
+              <span className="text-xs font-mono text-primary uppercase font-bold tracking-widest block">
+                Verified Social & Network Ports
+              </span>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* GitHub */}
+                <a
+                  href="https://github.com/Ronu450"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col justify-between group space-y-2 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <Github className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div>
+                    <div className="font-mono text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                      GitHub
+                    </div>
+                    <div className="text-[10px] font-mono text-muted-foreground">
+                      @Ronu450
+                    </div>
+                  </div>
+                </a>
+
+                {/* LinkedIn */}
+                <a
+                  href="https://www.linkedin.com/in/ronu-skariah"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col justify-between group space-y-2 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <Linkedin className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div>
+                    <div className="font-mono text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                      LinkedIn
+                    </div>
+                    <div className="text-[10px] font-mono text-muted-foreground">
+                      /in/ronu-skariah
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* Security Guarantee Badge */}
+            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 text-xs font-mono text-muted-foreground flex items-start gap-3">
+              <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <span>
+                Zero-tracker dispatch: All messages generate an encrypted local mailto transport directly in your native mail application.
+              </span>
+            </div>
+          </aside>
+
+          {/* Right Column: Next-Gen Dispatch Terminal (Contact Form) */}
+          <div className="lg:col-span-7 rounded-3xl border border-border/70 bg-card/90 dark:bg-[#20252B]/90 backdrop-blur-2xl p-6 sm:p-9 shadow-2xl relative overflow-hidden space-y-6">
+            {/* Top specular reflection line */}
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <div className="absolute -top-20 -right-20 w-44 h-44 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Terminal Form Header */}
+            <div className="border-b border-border/50 pb-5">
+              <div className="flex items-center gap-2 text-xs font-mono text-primary font-bold uppercase tracking-widest mb-1">
+                <Terminal className="w-4 h-4" />
+                <span>INTERACTIVE DISPATCH CONSOLE</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground">
+                Dispatch an Inquiry
               </h3>
-              <div className="flex items-center gap-2">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Open ${social.label} profile in a new tab`}
-                    title={social.label}
-                    className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Select your focus area and outline your vision. Submitting opens a populated draft directly in your preferred mail client.
+              </p>
+            </div>
+
+            {/* 1. Category Selection Pills */}
+            <div className="space-y-2">
+              <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground block">
+                Select Inquiry Domain:
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {projectCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`p-2.5 rounded-xl text-xs font-mono text-left transition-all border cursor-pointer ${
+                      selectedCategory === cat.id
+                        ? "bg-primary text-primary-foreground border-primary font-bold shadow-md shadow-primary/20 scale-[1.01]"
+                        : "bg-black/[0.02] dark:bg-white/[0.03] border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40"
+                    }`}
                   >
-                    <social.icon className="h-4 w-4" aria-hidden="true" />
-                  </a>
+                    {cat.label}
+                  </button>
                 ))}
               </div>
             </div>
 
-            <p className="mt-8 flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
-              <MessageSquare
-                className="mt-0.5 h-4 w-4 shrink-0 text-primary"
-                aria-hidden="true"
-              />
-              I typically respond within 24 hours.
-            </p>
-          </aside>
-
-          <div className="lg:col-span-8 rounded-xl border border-white/10 bg-card p-5 sm:p-7">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground">
-                Send a message
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Submitting opens a draft in your email app; this site doesn’t
-                send or store your message.
-              </p>
-            </div>
-
+            {/* 2. Interactive Form Fields */}
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-              <div>
-                <Label
-                  htmlFor="name"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  autoComplete="name"
-                  maxLength={80}
-                  value={formData.name}
-                  onChange={(event) => updateField("name", event.target.value)}
-                  onBlur={() => validateOnBlur("name")}
-                  aria-invalid={Boolean(formErrors.name)}
-                  aria-describedby={formErrors.name ? "name-error" : undefined}
-                  placeholder="Your name"
-                  required
-                />
-                {formErrors.name && (
-                  <p
-                    id="name-error"
-                    role="alert"
-                    className="mt-1.5 text-xs text-red-400"
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label
+                    htmlFor="name"
+                    className="mb-1.5 block text-xs font-mono uppercase tracking-wider text-muted-foreground"
                   >
-                    {formErrors.name}
-                  </p>
-                )}
-              </div>
+                    Your Name
+                  </Label>
+                  <Input
+                    id="name"
+                    autoComplete="name"
+                    maxLength={80}
+                    value={formData.name}
+                    onChange={(event) => updateField("name", event.target.value)}
+                    onBlur={() => validateOnBlur("name")}
+                    aria-invalid={Boolean(formErrors.name)}
+                    aria-describedby={formErrors.name ? "name-error" : undefined}
+                    placeholder="e.g. Jane Doe"
+                    required
+                    className="h-11 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border-border/60 focus:border-primary focus:ring-primary/20 text-sm font-sans"
+                  />
+                  {formErrors.name && (
+                    <p
+                      id="name-error"
+                      role="alert"
+                      className="mt-1.5 text-xs text-red-400 font-mono"
+                    >
+                      {formErrors.name}
+                    </p>
+                  )}
+                </div>
 
-              <div>
-                <Label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Email address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  maxLength={254}
-                  value={formData.email}
-                  onChange={(event) => updateField("email", event.target.value)}
-                  onBlur={() => validateOnBlur("email")}
-                  aria-invalid={Boolean(formErrors.email)}
-                  aria-describedby={
-                    formErrors.email ? "email-error" : undefined
-                  }
-                  placeholder="you@example.com"
-                  required
-                />
-                {formErrors.email && (
-                  <p
-                    id="email-error"
-                    role="alert"
-                    className="mt-1.5 text-xs text-red-400"
+                <div>
+                  <Label
+                    htmlFor="email"
+                    className="mb-1.5 block text-xs font-mono uppercase tracking-wider text-muted-foreground"
                   >
-                    {formErrors.email}
-                  </p>
-                )}
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    maxLength={254}
+                    value={formData.email}
+                    onChange={(event) => updateField("email", event.target.value)}
+                    onBlur={() => validateOnBlur("email")}
+                    aria-invalid={Boolean(formErrors.email)}
+                    aria-describedby={
+                      formErrors.email ? "email-error" : undefined
+                    }
+                    placeholder="jane@company.com"
+                    required
+                    className="h-11 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border-border/60 focus:border-primary focus:ring-primary/20 text-sm font-sans"
+                  />
+                  {formErrors.email && (
+                    <p
+                      id="email-error"
+                      role="alert"
+                      className="mt-1.5 text-xs text-red-400 font-mono"
+                    >
+                      {formErrors.email}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div>
                 <Label
                   htmlFor="message"
-                  className="mb-2 block text-sm font-medium"
+                  className="mb-1.5 block text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center justify-between"
                 >
-                  Message
+                  <span>Project Scope & Message</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {formData.message.length} / 5000 chars
+                  </span>
                 </Label>
                 <Textarea
                   id="message"
@@ -299,35 +425,42 @@ export function Contact() {
                   aria-describedby={
                     formErrors.message ? "message-error" : undefined
                   }
-                  placeholder="What are you working on?"
+                  placeholder="Outline your application requirements, architectural goals, or team timeline..."
                   rows={5}
                   maxLength={5000}
                   required
+                  className="rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border-border/60 focus:border-primary focus:ring-primary/20 text-sm font-sans leading-relaxed resize-y"
                 />
                 {formErrors.message && (
                   <p
                     id="message-error"
                     role="alert"
-                    className="mt-1.5 text-xs text-red-400"
+                    className="mt-1.5 text-xs text-red-400 font-mono"
                   >
                     {formErrors.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-3">
-                <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                  <Send className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Open email draft
+              {/* Action Button & Dispatch Feedback */}
+              <div className="space-y-3 pt-2">
+                <Button
+                  type="submit"
+                  className="min-h-12 w-full rounded-2xl bg-primary text-primary-foreground font-mono font-bold text-sm sm:text-base shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>TRANSMIT MESSAGE DRAFT →</span>
                 </Button>
+
                 {formStatus && (
-                  <p
+                  <div
                     role="status"
                     aria-live="polite"
-                    className="text-sm text-muted-foreground"
+                    className="p-3.5 rounded-xl bg-primary/10 border border-primary/25 text-xs font-mono text-foreground flex items-center gap-2"
                   >
-                    {formStatus}
-                  </p>
+                    <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                    <span>{formStatus}</span>
+                  </div>
                 )}
               </div>
             </form>

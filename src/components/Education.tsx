@@ -1,385 +1,390 @@
-import { Award, ChevronDown, Code2, GraduationCap, MapPin } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Card } from "./ui/card";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Code2,
+  GraduationCap,
+  MapPin,
+  Pause,
+  Play,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import MagicRings from "./MagicRings";
 
 interface EducationItem {
   id: string;
+  orderNumber: string;
+  badgeLabel: string;
   degree: string;
   institution: string;
   period: string;
+  level: string;
+  honour: string;
   location: string;
-}
-
-interface CertificationItem {
-  id: string;
-  name: string;
-  issuer: string;
-  credentialType: "Certification" | "Internship";
-}
-
-type EducationPhase =
-  | "idle"
-  | "emerging"
-  | "traveling"
-  | "developer"
-  | "settled";
-
-interface MarkerPosition {
-  x: number;
-  y: number;
+  summary: string;
+  coursework: string[];
+  ringColor: string;
+  ringColorTwo: string;
+  outcomeNote: string;
 }
 
 export function Education() {
   const educations: EducationItem[] = [
     {
       id: "2019",
+      orderNumber: "01",
+      badgeLabel: "Undergraduate Degree",
       degree: "Bachelor of Technology in Computer Science",
       institution: "Saintgits College of Engineering",
-      period: "2019",
-      location: "Kerala",
+      period: "2015 – 2019",
+      level: "Undergraduate Degree",
+      honour: "First Class Degree",
+      location: "Kerala, India",
+      summary:
+        "Foundational mastery in computer science fundamentals, data structures, operating systems, object-oriented systems design, and engineering methodologies.",
+      coursework: [
+        "Core Java & OOP",
+        "Data Structures & Algorithms",
+        "Database Management (SQL)",
+        "Operating Systems",
+        "Computer Networks",
+        "Software Engineering",
+      ],
+      ringColor: "#426A8C", // Muted Blue
+      ringColorTwo: "#52606D", // Slate Gray
+      outcomeNote: "Graduated with First Class • Launched Career in Enterprise Engineering",
     },
     {
-      id: "2022",
+      id: "2023",
+      orderNumber: "02",
+      badgeLabel: "Postgraduate Master's",
       degree: "MSc in Data Analytics",
       institution: "National College of Ireland",
-      period: "2022",
-      location: "Ireland",
+      period: "2022 – 2023",
+      level: "Postgraduate Master's",
+      honour: "First Class Honours",
+      location: "Dublin, Ireland",
+      summary:
+        "Advanced specialization in distributed data analytics, machine learning engineering, statistical modeling, big data architectures, and predictive analytics.",
+      coursework: [
+        "Machine Learning & AI",
+        "Big Data Architectures",
+        "Distributed Computing",
+        "Statistical Modeling",
+        "Data Mining & ETL",
+        "Data Visualization",
+      ],
+      ringColor: "#426A8C", // Muted Blue
+      ringColorTwo: "#7F9CB5", // Soft Steel Accent
+      outcomeNote: "Graduated with First Class Honours • Professional Full-Stack & Data Engineer",
     },
   ];
 
-  const certifications: CertificationItem[] = [
-    {
-      id: "1",
-      name: "Introduction to Artificial Intelligence",
-      issuer: "Microsoft",
-      credentialType: "Certification",
-    },
-    {
-      id: "2",
-      name: "MongoDB",
-      issuer: "Infosys Certified",
-      credentialType: "Certification",
-    },
-    {
-      id: "3",
-      name: "Power BI",
-      issuer: "Infosys Certified",
-      credentialType: "Certification",
-    },
-    {
-      id: "4",
-      name: "Teradata",
-      issuer: "Infosys Certified",
-      credentialType: "Certification",
-    },
-    {
-      id: "5",
-      name: "Accenture Virtual Internship",
-      issuer: "Forage",
-      credentialType: "Internship",
-    },
-    {
-      id: "6",
-      name: "JPMorgan Chase Virtual Internship",
-      issuer: "Forage",
-      credentialType: "Internship",
-    },
-    {
-      id: "7",
-      name: "KPMG Virtual Internship",
-      issuer: "Forage",
-      credentialType: "Internship",
-    },
-  ];
+  // Active Tile Index (0 = 2019, 1 = Class of 2023)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [burstCount, setBurstCount] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const autoPlayTimerRef = useRef<number | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-  const journeyRef = useRef<HTMLDivElement>(null);
-  const stopRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const phaseRef = useRef<EducationPhase>("idle");
-  const [phase, setPhase] = useState<EducationPhase>("idle");
-  const [markerPosition, setMarkerPosition] = useState<MarkerPosition | null>(
-    null,
-  );
-  const [expandedCertifications, setExpandedCertifications] = useState<
-    Set<string>
-  >(() => new Set());
+  const currentEdu = educations[currentIndex];
 
-  const toggleCertification = (id: string) => {
-    setExpandedCertifications((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const switchTile = useCallback((nextIndex: number) => {
+    setIsTransitioning(true);
+    setBurstCount((prev) => prev + 1);
+    setTimeout(() => {
+      setCurrentIndex(nextIndex);
+      setIsTransitioning(false);
+    }, 220);
+  }, []);
 
+  const handleNext = useCallback(() => {
+    const next = (currentIndex + 1) % educations.length;
+    switchTile(next);
+  }, [currentIndex, educations.length, switchTile]);
+
+  const handlePrev = useCallback(() => {
+    const prev = (currentIndex - 1 + educations.length) % educations.length;
+    switchTile(prev);
+  }, [currentIndex, educations.length, switchTile]);
+
+  const handleReplayOrder = useCallback(() => {
+    switchTile(0);
+    setIsPlaying(true);
+  }, [switchTile]);
+
+  // Auto-play timer
   useEffect(() => {
-    const journey = journeyRef.current;
-    const motionPreference = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
-    if (
-      !journey ||
-      motionPreference.matches ||
-      !("IntersectionObserver" in window)
-    ) {
+    if (!isPlaying || isHovered) {
+      if (autoPlayTimerRef.current) {
+        window.clearTimeout(autoPlayTimerRef.current);
+        autoPlayTimerRef.current = null;
+      }
       return;
     }
 
-    const timers: number[] = [];
-    const setJourneyPhase = (nextPhase: EducationPhase) => {
-      phaseRef.current = nextPhase;
-      setPhase(nextPhase);
-    };
-    const clearSequenceTimers = () => {
-      timers.forEach(window.clearTimeout);
-      timers.length = 0;
-    };
-    const placeMarkerAt = (index: number) => {
-      const stop = stopRefs.current[index];
-      if (!stop) return;
-      const journeyBounds = journey.getBoundingClientRect();
-      const stopBounds = stop.getBoundingClientRect();
-      setMarkerPosition({
-        x: stopBounds.left - journeyBounds.left + stopBounds.width / 2 - 22,
-        y: stopBounds.top - journeyBounds.top + stopBounds.height / 2 - 22,
-      });
-    };
-    const updateMarkerPosition = () => {
-      if (phaseRef.current === "emerging") placeMarkerAt(0);
-      if (
-        phaseRef.current === "traveling" ||
-        phaseRef.current === "developer"
-      ) {
-        placeMarkerAt(1);
-      }
-    };
-    const finishSequence = () => {
-      clearSequenceTimers();
-      setMarkerPosition(null);
-      setJourneyPhase("settled");
-    };
-    const resetSequence = () => {
-      clearSequenceTimers();
-      setMarkerPosition(null);
-      setJourneyPhase("idle");
-    };
-    const startSequence = () => {
-      if (phaseRef.current !== "idle") return;
-      placeMarkerAt(0);
-      setJourneyPhase("emerging");
-      timers.push(
-        window.setTimeout(() => {
-          setJourneyPhase("traveling");
-          placeMarkerAt(1);
-        }, 850),
-      );
-      timers.push(
-        window.setTimeout(() => {
-          placeMarkerAt(1);
-          setJourneyPhase("developer");
-        }, 1800),
-      );
-      timers.push(
-        window.setTimeout(() => {
-          setMarkerPosition(null);
-          setJourneyPhase("settled");
-        }, 2750),
-      );
-    };
-
-    const intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.15) {
-            if (motionPreference.matches) finishSequence();
-            else startSequence();
-          } else if (!entry.isIntersecting && phaseRef.current !== "idle") {
-            resetSequence();
-          }
-        });
-      },
-      { threshold: 0.15 },
-    );
-    intersectionObserver.observe(journey);
-
-    const resizeObserver = new ResizeObserver(updateMarkerPosition);
-    resizeObserver.observe(journey);
-    stopRefs.current.forEach((stop) => {
-      if (stop) resizeObserver.observe(stop);
-    });
-
-    const handleMotionPreferenceChange = () => {
-      if (motionPreference.matches && phaseRef.current !== "idle") {
-        finishSequence();
-      }
-    };
-    motionPreference.addEventListener("change", handleMotionPreferenceChange);
+    autoPlayTimerRef.current = window.setTimeout(() => {
+      handleNext();
+    }, 5500);
 
     return () => {
-      intersectionObserver.disconnect();
-      resizeObserver.disconnect();
-      motionPreference.removeEventListener(
-        "change",
-        handleMotionPreferenceChange,
-      );
-      timers.forEach(window.clearTimeout);
+      if (autoPlayTimerRef.current) {
+        window.clearTimeout(autoPlayTimerRef.current);
+      }
     };
-  }, []);
+  }, [currentIndex, isPlaying, isHovered, handleNext]);
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-20">
-          <div className="mb-8">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              The academic chapters
-            </p>
-            <h2 className="mb-2 text-3xl font-bold text-foreground sm:text-4xl">
-              Education
-            </h2>
-            <p className="text-muted-foreground">
-              Two milestones that shaped my path.
-            </p>
+    <section
+      ref={sectionRef}
+      className="relative py-20 px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col justify-center bg-transparent"
+    >
+      <div className="max-w-5xl mx-auto w-full">
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold bg-primary/10 border border-primary/20 text-primary mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Academic Milestones</span>
           </div>
 
-          <div
-            ref={journeyRef}
-            className={`education-journey education-journey--${phase}`}
-          >
-            <div className="education-role-stage" aria-hidden="true">
-              <div
-                className={`education-role${phase === "developer" ? " education-role--visible" : ""}`}
-              >
-                <Code2 className="h-4 w-4" />
-                Software Developer
-              </div>
-            </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight">
+            Education
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-muted-foreground font-mono">
+            Chronological progression • Computer science foundation to advanced data analytics
+          </p>
+        </div>
 
-            <div className="education-journey__grid grid gap-5 md:grid-cols-2">
-              {educations.map((edu, index) => (
-                <Card
+        {/* Milestone Navigation & Control Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 px-2">
+          {/* Stepper Tabs */}
+          <div className="flex items-center gap-2">
+            {educations.map((edu, idx) => {
+              const isActive = idx === currentIndex;
+              return (
+                <button
                   key={edu.id}
-                  className={`education-tile education-tile--${edu.period} group relative overflow-hidden rounded-xl border border-white/10 bg-card transition-colors duration-300 hover:border-primary/30`}
+                  onClick={() => switchTile(idx)}
+                  className={`group relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-mono font-semibold transition-all duration-200 border ${
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+                  }`}
                 >
-                  <div className="education-tile__content flex h-full flex-col p-5 sm:p-6">
-                    <div className="mb-8 flex items-start justify-between gap-4">
-                      <div
-                        className="education-tile__icon"
-                        ref={(node) => {
-                          stopRefs.current[index] = node;
-                        }}
-                      >
-                        <GraduationCap className="h-6 w-6" aria-hidden="true" />
-                      </div>
-                      <div className="text-right">
-                        <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                          Class of
-                        </span>
-                        <span className="education-tile__year text-3xl font-bold text-foreground sm:text-4xl">
-                          {edu.period}
-                        </span>
-                      </div>
-                    </div>
+                  <span
+                    className={`w-2 h-2 rounded-full transition-transform ${
+                      isActive ? "scale-125 bg-current animate-pulse" : "bg-muted-foreground/40"
+                    }`}
+                  />
+                  <span>
+                    {edu.orderNumber}. {edu.id === "2019" ? "2019" : "Class of 2023"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-                    <div className="mt-auto">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-                        Academic degree
-                      </p>
-                      <h3 className="mb-3 text-lg font-semibold leading-snug text-foreground">
-                        {edu.degree}
-                      </h3>
-                      <p className="mb-2 text-sm font-medium text-muted-foreground">
-                        {edu.institution}
-                      </p>
-                      <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5 text-primary/80" />
-                        {edu.location}
-                      </p>
-                    </div>
-                    <span
-                      className="education-tile__ground"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </Card>
-              ))}
-            </div>
+          {/* Player & Sequence Controls */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPlaying((p) => !p)}
+              className="p-2 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              title={isPlaying ? "Pause auto-advance" : "Resume auto-advance"}
+              aria-label={isPlaying ? "Pause auto-advance" : "Resume auto-advance"}
+            >
+              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            </button>
 
-            {markerPosition && phase !== "settled" && (
-              <div
-                className={`education-marker${phase === "developer" ? " education-marker--developer" : ""}`}
-                style={{
-                  transform: `translate3d(${markerPosition.x}px, ${markerPosition.y}px, 0)`,
-                }}
-                aria-hidden="true"
-              >
-                <GraduationCap className="education-marker__graduate h-6 w-6" />
-                <Code2 className="education-marker__developer h-5 w-5" />
-              </div>
-            )}
+            <button
+              onClick={handleReplayOrder}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-mono font-semibold transition-all active:scale-95"
+              title="Restart from 2019"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Replay Order</span>
+            </button>
           </div>
         </div>
 
-        {/* Certifications Section */}
-        <div>
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2">
-            Certifications & Internships
-          </h3>
-          <p className="text-muted-foreground mb-8">
-            Professional certifications and training
-          </p>
+        {/* =========================================================================
+            MAGIC RING PORTAL STAGE:
+            - The Magic Ring shader is placed OUTSIDE the tile across the stage.
+            - Low opacity, muted blue & slate gray palette.
+            - Only ONE tile is rendered at a time INSIDE the center of the ring.
+           ========================================================================= */}
+        <div
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="relative w-full min-h-[560px] sm:min-h-[600px] flex items-center justify-center py-10 px-4 rounded-3xl overflow-hidden bg-transparent border-0"
+        >
+          {/* 1. OUTSIDE SHADER: React Bits Magic Rings Animation in Muted Palette */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <MagicRings
+              color={currentEdu.ringColor}
+              colorTwo={currentEdu.ringColorTwo}
+              ringCount={currentIndex === 0 ? 6 : 7}
+              speed={0.65}
+              attenuation={4.8}
+              lineThickness={2.0}
+              baseRadius={0.24}
+              radiusStep={0.065}
+              scaleRate={0.06}
+              opacity={0.55}
+              noiseAmount={0.04}
+              followMouse={true}
+              mouseInfluence={0.16}
+              hoverScale={1.1}
+              parallax={0.03}
+              clickBurst={true}
+              burstTrigger={burstCount}
+              className="w-full h-full"
+            />
+          </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            {certifications.map((cert, index) => (
-              <article
-                className={`certificate-tile${expandedCertifications.has(cert.id) ? " certificate-tile--expanded" : ""}`}
-                key={cert.id}
-              >
-                <button
-                  type="button"
-                  className="certificate-tile__trigger"
-                  aria-expanded={expandedCertifications.has(cert.id)}
-                  aria-controls={`certificate-details-${cert.id}`}
-                  onClick={() => toggleCertification(cert.id)}
-                >
-                  <span className="certificate-tile__heading">
-                    <span className="certificate-tile__type">
-                      {cert.credentialType}
-                    </span>
-                    <span className="certificate-tile__wordmark">
-                      Credential {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <ChevronDown
-                      className="certificate-tile__chevron h-4 w-4"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span className="certificate-tile__name">{cert.name}</span>
-                </button>
+          {/* 2. Soft Ambient Radial Glow behind the floating tile */}
+          <div
+            className="absolute w-80 sm:w-96 h-80 sm:h-96 rounded-full blur-[100px] pointer-events-none transition-colors duration-700 z-0 bg-primary/10"
+          />
 
-                <div
-                  id={`certificate-details-${cert.id}`}
-                  className="certificate-tile__reveal"
-                  aria-hidden={!expandedCertifications.has(cert.id)}
-                >
-                  <div className="certificate-tile__reveal-inner">
-                    <div className="certificate-tile__details">
-                      <p className="certificate-tile__eyebrow">
-                        Credential details
-                      </p>
-                      <div className="certificate-tile__issuer">
-                        <span>Issued by</span>
-                        <strong>{cert.issuer}</strong>
-                      </div>
-                    </div>
+          {/* 3. Left Navigation Arrow */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 sm:left-6 z-20 w-10 h-10 rounded-full border border-border/50 bg-card/85 hover:bg-card text-foreground flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm group hover:border-primary/50"
+            aria-label="Previous milestone"
+          >
+            <ChevronLeft className="w-4 h-4 text-primary group-hover:-translate-x-0.5 transition-transform" />
+          </button>
+
+          {/* 4. Right Navigation Arrow */}
+          <button
+            onClick={handleNext}
+            className="absolute right-2 sm:right-6 z-20 w-10 h-10 rounded-full border border-border/50 bg-card/85 hover:bg-card text-foreground flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm group hover:border-primary/50"
+            aria-label="Next milestone"
+          >
+            <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-transform" />
+          </button>
+
+          {/* 5. THE SINGLE TILE INSIDE THE MAGIC RING (No big year text inside) */}
+          <div
+            className={`relative z-10 w-full max-w-lg sm:max-w-xl mx-auto transition-all duration-300 ease-out ${
+              isTransitioning
+                ? "opacity-0 scale-95 translate-y-3"
+                : "opacity-100 scale-100 translate-y-0"
+            }`}
+          >
+            <div
+              className="relative rounded-2xl border border-border/40 bg-card/95 text-card-foreground p-6 sm:p-8 backdrop-blur-xl shadow-lg transition-all duration-300 hover:shadow-xl"
+            >
+              {/* Top Card Subtle Accent Line */}
+              <div
+                className="absolute top-0 inset-x-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+              />
+
+              {/* Card Header: Icon, Category & Period Pill (Big year text removed) */}
+              <div className="flex items-start justify-between gap-4 border-b border-border/50 pb-5 mb-5">
+                <div className="flex items-center gap-3.5">
+                  <div
+                    className="w-12 h-12 rounded-xl border border-primary/20 bg-primary/10 text-primary flex items-center justify-center shadow-sm"
+                  >
+                    <GraduationCap className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <span className="block text-[11px] font-mono font-bold uppercase tracking-widest text-primary">
+                      {currentEdu.badgeLabel}
+                    </span>
+                    <span className="text-xs font-mono text-muted-foreground">
+                      Stage {currentEdu.orderNumber} of 02
+                    </span>
                   </div>
                 </div>
 
-                <div className="certificate-tile__seal" aria-hidden="true">
-                  <Award className="h-6 w-6" />
+                {/* Right side: Clean Period and Honours Pill (big text removed) */}
+                <div className="text-right flex flex-col items-end gap-1">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-primary/10 text-primary border border-primary/20">
+                    <Calendar className="w-3 h-3 text-primary" />
+                    <span>{currentEdu.period}</span>
+                  </span>
+                  <span className="text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-wide">
+                    {currentEdu.honour}
+                  </span>
                 </div>
-              </article>
-            ))}
+              </div>
+
+              {/* Degree Title & Institution */}
+              <div className="space-y-2 mb-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-mono text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                    {currentEdu.location}
+                  </span>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-bold leading-snug text-foreground">
+                  {currentEdu.degree}
+                </h3>
+                <p className="text-sm sm:text-base font-semibold text-primary">
+                  {currentEdu.institution}
+                </p>
+              </div>
+
+              {/* Academic Overview Summary */}
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-5">
+                {currentEdu.summary}
+              </p>
+
+              {/* Curriculum & Key Disciplines Chips */}
+              <div className="pt-4 border-t border-border/50 space-y-2.5">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground block font-bold">
+                  Curriculum & Applied Disciplines:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {currentEdu.coursework.map((course) => (
+                    <span
+                      key={course}
+                      className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                    >
+                      {course}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Trajectory Outcome Note */}
+              <div className="mt-5 pt-3.5 border-t border-border/30 flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                <Code2 className="w-4 h-4 text-primary shrink-0" />
+                <span className="truncate">{currentEdu.outcomeNote}</span>
+              </div>
+            </div>
+
+            {/* Stepper Progress Dots below the card */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              {educations.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => switchTile(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === currentIndex
+                      ? "w-8 bg-primary"
+                      : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+                  }`}
+                  aria-label={`Go to milestone ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Global Capstone Outcome Banner */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-mono font-medium bg-card border border-border text-muted-foreground shadow-sm">
+            <Code2 className="w-4 h-4 text-primary" />
+            <span>
+              Cumulative Pathway: Saintgits (2019) ➜ NCI (Class of 2023) ➜ Software Developer & Data Engineer
+            </span>
           </div>
         </div>
       </div>
