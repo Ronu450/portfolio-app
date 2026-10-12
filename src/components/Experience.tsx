@@ -86,9 +86,9 @@ function formatExperienceYears(startDate: string): string {
 
 const EXPERIENCES: ExperienceItem[] = [
   {
-    id: "fintect",
+    id: "fintech",
     title: "Senior Software Developer",
-    company: "Fintect",
+    company: "Fintech",
     location: "Dublin, Ireland",
     period: "July 2023 – Present",
     isCurrent: true,
@@ -165,8 +165,8 @@ const EXPERIENCES: ExperienceItem[] = [
 
 const ARCHITECTURE_BLUEPRINTS: DevelopmentWorkSlide[] = [
   {
-    id: "fintect-core",
-    company: "Fintect",
+    id: "fintech-core",
+    company: "Fintech",
     role: "Senior Software Developer",
     badgeCode: "ENTERPRISE CORE // FINANCIAL BACKBONE",
     title: "High-Throughput Financial REST Services & Immutable Audits",
@@ -337,8 +337,8 @@ def generate_partitioned_query(table_name: str, filters: dict, group_cols: list)
     },
   },
   {
-    id: "fintect-console",
-    company: "Fintect",
+    id: "fintech-console",
+    company: "Fintech",
     role: "Senior Software Developer",
     badgeCode: "AUTOMATION ENGINE // REAL-TIME DISPATCH",
     title: "Spring Boot Console Automation & Feed Dispatcher",
@@ -394,7 +394,7 @@ def generate_partitioned_query(table_name: str, filters: dict, group_cols: list)
   },
   {
     id: "auth-shield",
-    company: "Fintect",
+    company: "Fintech",
     role: "Senior Software Developer",
     badgeCode: "ZERO-TRUST // IDENTITY SHIELD",
     title: "OAuth 2.0 Full-Stack Security & RBAC Gateway",
@@ -449,7 +449,7 @@ def generate_partitioned_query(table_name: str, filters: dict, group_cols: list)
   },
   {
     id: "devops-mesh",
-    company: "Fintect",
+    company: "Fintech",
     role: "Senior Software Developer",
     badgeCode: "CONTAINER PLATFORMS // OPENSHIFT HELM",
     title: "OpenShift Helm Deployments & CI/CD Pipeline Automation",
@@ -507,7 +507,7 @@ def generate_partitioned_query(table_name: str, filters: dict, group_cols: list)
 
 export function Experience() {
   const [activeTab, setActiveTab] = useState<"timeline" | "blueprints">("timeline");
-  const [activeBlueprintId, setActiveBlueprintId] = useState<string>("fintect-core");
+  const [activeBlueprintId, setActiveBlueprintId] = useState<string>("fintech-core");
   const [inspectModalSlide, setInspectModalSlide] = useState<DevelopmentWorkSlide | null>(null);
 
   const activeBlueprint =
@@ -551,7 +551,7 @@ export function Experience() {
                 DUBLIN, IRELAND • {formatExperienceYears("2019-12-01")} TOTAL CAREER
               </span>
               <span className="text-xs font-mono text-muted-foreground hidden sm:inline">
-                Fintect Senior Software Developer & Infosys Systems Engineer
+                Fintech Senior Software Developer & Infosys Systems Engineer
               </span>
             </div>
           </div>
@@ -596,8 +596,8 @@ export function Experience() {
             },
             {
               label: "Global Enterprise",
-              val: "Fintect",
-              sub: "Fintect Dublin",
+              val: "Fintech",
+              sub: "Fintech Dublin",
               color: "text-foreground",
             },
             {
@@ -647,7 +647,7 @@ export function Experience() {
                   Senior Full-Stack Software Developer & Enterprise Systems Architect
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-4xl">
-                  Experienced Software Developer with over 6 years of expertise architecting high-throughput financial backbones, mission-critical Spring Boot RESTful services, and modern reactive frontends under strict zero-defect regulatory compliance at <strong className="text-foreground">Fintect</strong>. Proven background in cloud ETL data engineering, automated pipeline orchestration with AWS Managed Airflow and Azure Data Factory at <strong className="text-foreground">Infosys Ltd.</strong>, and implementing zero-trust OAuth 2.0 authorization back-to-front. Dedicated to clean architecture, sub-50ms API response times, and automated containerized delivery on Red Hat OpenShift.
+                  Experienced Software Developer with over 6 years of expertise architecting high-throughput financial backbones, mission-critical Spring Boot RESTful services, and modern reactive frontends under strict zero-defect regulatory compliance at <strong className="text-foreground">Fintech</strong>. Proven background in cloud ETL data engineering, automated pipeline orchestration with AWS Managed Airflow and Azure Data Factory at <strong className="text-foreground">Infosys Ltd.</strong>, and implementing zero-trust OAuth 2.0 authorization back-to-front. Dedicated to clean architecture, sub-50ms API response times, and automated containerized delivery on Red Hat OpenShift.
                 </p>
               </div>
             </div>

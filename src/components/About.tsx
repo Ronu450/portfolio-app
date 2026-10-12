@@ -13,11 +13,12 @@ import {
 import { useEffect, useState, type MouseEvent } from "react";
 
 const TRACKS = [
-  { artist: "The Weeknd", title: '"Blinding Lights" / Starboy', vibe: "Midnight Synthwave" },
-  { artist: "Hans Zimmer", title: '"Time" / Inception OST', vibe: "Orchestral Deep Focus" },
-  { artist: "Daft Punk", title: '"Get Lucky" / Random Access', vibe: "Electronic Groove" },
-  { artist: "Coldplay", title: '"Viva La Vida" / Rush of Blood', vibe: "Anthemic Melodic" },
-  { artist: "Eminem", title: '"Lose Yourself" / 8 Mile', vibe: "High-Energy Drive" },
+  { artist: "Linkin Park", title: '"In the End" / Hybrid Theory', vibe: "Alternative Rock & Drive" },
+  { artist: "Arctic Monkeys", title: '"Do I Wanna Know?" / AM', vibe: "Indie Rock & Midnight Groove" },
+  { artist: "Vedan", title: '"Voice of the Voiceless"', vibe: "Malayalam Hip-Hop & Raw Energy" },
+  { artist: "Job Kurian", title: '"Enthaavo" / Hope Project', vibe: "Contemporary Indie & Soulful Melodies" },
+  { artist: "K. J. Yesudas", title: '"Harivarasanam" / Classical Gems', vibe: "Celestial Classical & Timeless Vocals" },
+  { artist: "Johnson Master", title: '"Devaanganangal" / Film Classics', vibe: "Legendary Orchestral Melodies" },
 ];
 
 const GAMES = [
@@ -28,10 +29,10 @@ const GAMES = [
 ];
 
 const CLUBS = [
-  { name: "Manchester United", tactics: "Fast Wingers & Theatre of Dreams", league: "Premier League" },
-  { name: "Real Madrid", tactics: "Galácticos & European Royalty", league: "Champions League" },
-  { name: "Arsenal FC", tactics: "Fluid Positional Play & High Press", league: "Premier League" },
-  { name: "Celtic FC", tactics: "Passionate Parkhead European Nights", league: "Scottish Premiership" },
+  { name: "FC Barcelona", tactics: "Tiki-Taka & La Masia DNA", league: "La Liga" },
+  { name: "Manchester City (MCI)", tactics: "Fluid Positional Play & Relentless Press", league: "Premier League" },
+  { name: "Kerala Blasters FC", tactics: "Manjappada Yellow Sea & South Indian Pride", league: "Indian Super League" },
+  { name: "Argentina", tactics: "La Albiceleste Passion & World Champion Grit", league: "International / FIFA World Cup" },
 ];
 
 const aboutFilterButtons = [
@@ -283,7 +284,7 @@ export function About() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-border/80">
             <div>
               <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">
-                About <span className="aurora-text">Ronu Skariah</span>
+                About <span className="aurora-text">Me</span>
               </h2>
             </div>
 
@@ -412,7 +413,7 @@ export function About() {
                   <div className="flex items-center justify-between pt-4 border-t border-border/60 text-xs font-mono text-muted-foreground">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-primary" />
-                      Fintect (Dublin) • 6 Years Continuous Impact
+                      Fintech (Dublin) • 6 Years Continuous Impact
                     </span>
                     <span className="text-primary font-serif italic text-base">Ronu Skariah ~</span>
                   </div>

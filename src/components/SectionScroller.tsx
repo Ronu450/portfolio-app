@@ -12,9 +12,8 @@ const SECTIONS = [
   { id: "experience", label: "04 // Experience", color: "#426A8C" },
   { id: "education", label: "05 // Education", color: "#426A8C" },
   { id: "credentials", label: "06 // Credentials", color: "#426A8C" },
-  { id: "stories", label: "07 // Dev Works", color: "#426A8C" },
-  { id: "gallery", label: "08 // Gallery", color: "#426A8C" },
-  { id: "contact", label: "09 // Contact", color: "#426A8C" },
+  { id: "gallery", label: "07 // Gallery", color: "#426A8C" },
+  { id: "contact", label: "08 // Contact", color: "#426A8C" },
 ];
 
 export function SectionScroller({ activeSection }: SectionScrollerProps) {

@@ -458,6 +458,7 @@ export default function TileReveal({
                   alt={item.title}
                   draggable={false}
                   loading="lazy"
+                  decoding="async"
                   className={`h-full w-full select-none object-cover transition-all duration-500 group-hover:scale-108 ${
                     grayscale ? 'grayscale' : ''
                   }`}

@@ -55,7 +55,6 @@ export function Navigation({
     { id: "experience", label: "Experience" },
     { id: "education", label: "Education" },
     { id: "credentials", label: "Credentials" },
-    { id: "stories", label: "Works" },
     { id: "gallery", label: "Gallery" },
     { id: "contact", label: "Contact" },
   ];

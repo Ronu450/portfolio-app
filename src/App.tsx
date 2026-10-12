@@ -5,7 +5,6 @@ import { Skills } from "./components/Skills";
 import { Experience } from "./components/Experience";
 import { Education } from "./components/Education";
 import { Credentials } from "./components/Credentials";
-import { Stories } from "./components/Stories";
 import { Gallery } from "./components/Gallery";
 import { Contact } from "./components/Contact";
 import { Navigation } from "./components/Navigation";
@@ -29,7 +28,6 @@ export default function App() {
       "experience",
       "education",
       "credentials",
-      "stories",
       "gallery",
       "contact",
     ];
@@ -88,7 +86,7 @@ export default function App() {
             active={activeSection === "home"}
           />
           <div className="relative z-10">
-            <ScrollReveal active={activeSection === "home"}>
+            <ScrollReveal active={activeSection === "home"} immediate={true}>
               <Hero />
             </ScrollReveal>
           </div>
@@ -168,21 +166,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* 7. DEVELOPMENT WORKS (TILE REVEAL) */}
-        <section
-          id="stories"
-          className="relative min-h-screen bg-background border-t border-border/40"
-        >
-          <Section3DBackground
-            sectionId="stories"
-            active={activeSection === "stories"}
-          />
-          <div className="relative z-10">
-            <Stories />
-          </div>
-        </section>
-
-        {/* 8. GALLERY */}
+        {/* 7. GALLERY */}
         <section
           id="gallery"
           className="relative overflow-hidden min-h-screen bg-background/50 border-t border-border/40"

@@ -22,7 +22,7 @@ export function LaunchTransition({ onComplete }: LaunchTransitionProps) {
 
   useEffect(() => {
     const startTime = performance.now();
-    const duration = 750; // Fast snappy launch sequence
+    const duration = 280; // Ultra-fast snappy sequence
 
     const updateProgress = (currentTime: number) => {
       const elapsed = currentTime - startTime;
@@ -44,14 +44,12 @@ export function LaunchTransition({ onComplete }: LaunchTransitionProps) {
       if (rawProgress < 1) {
         requestAnimationFrame(updateProgress);
       } else {
-        // Trigger fast curtain exit
+        // Trigger immediate smooth curtain exit
+        setIsExiting(true);
+        if (onComplete) onComplete();
         setTimeout(() => {
-          setIsExiting(true);
-          setTimeout(() => {
-            setIsFinished(true);
-            if (onComplete) onComplete();
-          }, 400);
-        }, 120);
+          setIsFinished(true);
+        }, 250);
       }
     };
 
@@ -63,8 +61,8 @@ export function LaunchTransition({ onComplete }: LaunchTransitionProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col justify-between pointer-events-auto select-none transition-all duration-1000 ${
-        isExiting ? "opacity-0 pointer-events-none scale-105" : "opacity-100"
+      className={`fixed inset-0 z-[100] flex flex-col justify-between pointer-events-auto select-none transition-all duration-300 ${
+        isExiting ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       aria-label="Website booting sequence"
       role="dialog"
@@ -72,14 +70,14 @@ export function LaunchTransition({ onComplete }: LaunchTransitionProps) {
     >
       {/* Top Half Curtain */}
       <div
-        className={`absolute top-0 inset-x-0 h-1/2 bg-[#20252B] border-b border-[#353E48] transition-transform duration-1000 ease-[cubic-bezier(0.77,0,0.175,1)] z-10 ${
+        className={`absolute top-0 inset-x-0 h-1/2 bg-[#20252B] border-b border-[#353E48] transition-transform duration-300 ease-out z-10 ${
           isExiting ? "-translate-y-full" : "translate-y-0"
         }`}
       />
 
       {/* Bottom Half Curtain */}
       <div
-        className={`absolute bottom-0 inset-x-0 h-1/2 bg-[#20252B] border-t border-[#353E48] transition-transform duration-1000 ease-[cubic-bezier(0.77,0,0.175,1)] z-10 ${
+        className={`absolute bottom-0 inset-x-0 h-1/2 bg-[#20252B] border-t border-[#353E48] transition-transform duration-300 ease-out z-10 ${
           isExiting ? "translate-y-full" : "translate-y-0"
         }`}
       />

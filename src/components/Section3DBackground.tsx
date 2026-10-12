@@ -90,11 +90,11 @@ function ArchitecturalCanvasBackground({
 
     const handleResize = () => {
       if (!canvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       width = canvas.offsetWidth || window.innerWidth;
       height = canvas.offsetHeight || window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
       ctx.resetTransform();
       ctx.scale(dpr, dpr);
     };
@@ -104,6 +104,7 @@ function ArchitecturalCanvasBackground({
     resizeObserver.observe(canvas);
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (!isVisible || !active) return;
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left) / width - 0.5;
       const y = (e.clientY - rect.top) / height - 0.5;

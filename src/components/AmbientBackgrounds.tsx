@@ -90,7 +90,7 @@ export function RotatingStars() {
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.75);
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25);
       width = rect.width;
       height = rect.height;
       canvas.width = Math.round(width * pixelRatio);
@@ -435,7 +435,7 @@ export function ShaderWaves() {
     let elapsed = 0;
 
     const render = (time: number) => {
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25);
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
       if (!width || !height) return;

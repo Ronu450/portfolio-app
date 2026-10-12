@@ -3,10 +3,15 @@ import { useEffect, useRef, useState } from "react";
 interface ScrollRevealProps {
   children: React.ReactNode;
   active?: boolean;
+  immediate?: boolean;
 }
 
-export function ScrollReveal({ children, active = false }: ScrollRevealProps) {
-  const [isVisible, setIsVisible] = useState(false);
+export function ScrollReveal({
+  children,
+  active = false,
+  immediate = false,
+}: ScrollRevealProps) {
+  const [isVisible, setIsVisible] = useState(immediate);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

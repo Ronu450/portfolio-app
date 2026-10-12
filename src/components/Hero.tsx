@@ -4,12 +4,10 @@ import {
   Code,
   Palette,
   Zap,
-  RotateCw,
   ShieldCheck,
   QrCode,
   Sparkles,
   Hand,
-  BookOpen,
 } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import profileFull from "../assets/profile-full.png";
@@ -61,17 +59,13 @@ export function Hero() {
   const [canPlayVideo, setCanPlayVideo] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [activeRole, setActiveRole] = useState("Full Stack Engineer");
-  const [activeRoleScrambled, setActiveRoleScrambled] = useState(
-    "Full Stack Engineer",
-  );
   const [isDragging, setIsDragging] = useState(false);
-  const [storyChapter, setStoryChapter] = useState(0);
 
   // Scramble states for ID Card
   const [idNameScramble, setIdNameScramble] = useState("Ronu Skariah");
   const [idCodeScramble, setIdCodeScramble] = useState("RS-2048-SEC");
   const [idOrgScramble, setIdOrgScramble] = useState(
-    "Fintect (Dublin)",
+    "Fintech (Dublin)",
   );
   const [idAuthScramble, setIdAuthScramble] = useState("8829-4109-7721");
 
@@ -128,7 +122,6 @@ export function Hero() {
   // Handle Role Selection
   const handleSelectRole = (role: string) => {
     setActiveRole(role);
-    runScramble(role, setActiveRoleScrambled, 28, 1 / 2);
   };
 
   // Flip Card with dynamic reverse side decryption
@@ -136,7 +129,7 @@ export function Hero() {
     setIsFlipped(flipState);
     if (flipState) {
       setTimeout(() => {
-        runScramble("Fintect (Dublin)", setIdOrgScramble, 22, 1 / 2);
+        runScramble("Fintech (Dublin)", setIdOrgScramble, 22, 1 / 2);
         runScramble("8829-4109-7721", setIdAuthScramble, 20, 1 / 3);
       }, 250);
     } else {
@@ -757,139 +750,6 @@ export function Hero() {
                 ))}
               </div>
 
-              {/* Dynamic Cyber Decrypt Banner */}
-              <div className="p-3.5 rounded-xl bg-card border border-primary/25 shadow-sm max-w-lg flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                    Active Focus:
-                  </span>
-                  <span className="text-xs sm:text-sm font-mono font-bold text-primary tracking-wide">
-                    {activeRoleScrambled}
-                  </span>
-                </div>
-                <button
-                  onClick={() =>
-                    runScramble(
-                      activeRole,
-                      setActiveRoleScrambled,
-                      26,
-                      1 / 2,
-                    )
-                  }
-                  className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-colors cursor-pointer"
-                  title="Re-run text decrypt"
-                >
-                  <RotateCw className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Professional Summary Storytelling Console */}
-            <div className="relative rounded-2xl border border-primary/25 bg-card/80 dark:bg-[#121612]/80 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-4 max-w-xl group/story overflow-hidden transition-all duration-300 hover:border-primary/40">
-              {/* Top specular glow */}
-              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent pointer-events-none" />
-              <div className="absolute -top-16 -right-16 w-36 h-36 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-
-              {/* Console Header & Chapter Switcher */}
-              <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-[10px] sm:text-[11px] font-mono tracking-widest uppercase font-bold text-primary flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    Story Chapter 0{storyChapter + 1} / 03
-                  </span>
-                </div>
-                {/* Chapter Selection Pills */}
-                <div className="flex items-center gap-1">
-                  {[
-                    { id: 0, label: "01 Core" },
-                    { id: 1, label: "02 Craft" },
-                    { id: 2, label: "03 Cloud" },
-                  ].map((ch) => (
-                    <button
-                      key={ch.id}
-                      onClick={() => setStoryChapter(ch.id)}
-                      className={`px-2.5 py-1 text-[10px] font-mono rounded-lg transition-all cursor-pointer ${
-                        storyChapter === ch.id
-                          ? "bg-primary text-primary-foreground font-bold shadow-sm scale-105"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                      }`}
-                    >
-                      {ch.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Active Chapter Narrative */}
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[11px] font-mono font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/25">
-                    {storyChapter === 0
-                      ? "Enterprise Banking Backbone"
-                      : storyChapter === 1
-                      ? "Full Stack Craft & Security"
-                      : "Cloud Pipelines & Growth"}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    {storyChapter === 0
-                      ? "Fintect • Dublin"
-                      : storyChapter === 1
-                      ? "React 19 • OAuth 2.0 • TypeScript"
-                      : "Infosys • NCI Data Analytics"}
-                  </span>
-                </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-foreground leading-snug">
-                  {storyChapter === 0 && "Engineering High-Throughput Financial Backbones"}
-                  {storyChapter === 1 && "Merging Pixel-Perfect Craft with Zero-Trust Security"}
-                  {storyChapter === 2 && "From Big Data Orchestration to Production Mastery"}
-                </h3>
-
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {storyChapter === 0 &&
-                    "At Fintect (Dublin), I architect resilient Java 17+ and Spring Boot microservices handling mission-critical feeds. From multi-threading concurrency to Hibernate Envers compliance auditing and zero-downtime Helm deployments, I transform financial complexity into bulletproof reliability."}
-                  {storyChapter === 1 &&
-                    "Code without human delight is only half-built. I craft responsive React and TypeScript architectures reinforced with enterprise OAuth 2.0 access control, modern Vite workflows, and fluid 60fps micro-interactions that make dense data workflows feel effortless."}
-                  {storyChapter === 2 &&
-                    "My engineering odyssey started with cloud ETL pipelines at Infosys across AWS and Azure, evolving through master's research in Data Analytics at NCI Dublin. My philosophy: automate every friction point, write self-documenting code, and build platforms engineered to outlast tomorrow."}
-                </p>
-              </div>
-
-              {/* Story Metric Telemetry Bar */}
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/40 text-center font-mono">
-                {(storyChapter === 0
-                  ? [
-                      { label: "P99 Latency", val: "< 50ms" },
-                      { label: "Platform SLA", val: "99.99%" },
-                      { label: "Daily Feeds", val: "10M+ Req" },
-                    ]
-                  : storyChapter === 1
-                  ? [
-                      { label: "Security", val: "OAuth 2.0" },
-                      { label: "Type Safety", val: "100% TS" },
-                      { label: "Frame Rate", val: "60 FPS" },
-                    ]
-                  : [
-                      { label: "ETL Speedup", val: "+40%" },
-                      { label: "Ecosystem", val: "AWS / Azure" },
-                      { label: "Experience", val: "6+ Years" },
-                    ]
-                ).map((m, mIdx) => (
-                  <div
-                    key={mIdx}
-                    className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-border/40 hover:border-primary/30 transition-colors"
-                  >
-                    <div className="text-xs sm:text-sm font-black text-primary">
-                      {m.val}
-                    </div>
-                    <div className="text-[9px] text-muted-foreground uppercase tracking-tight">
-                      {m.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Action Buttons with Kinetic Text */}
@@ -913,7 +773,7 @@ export function Hero() {
           <div className="w-full md:col-span-5 flex flex-col items-center lg:items-end justify-center py-6">
             <div
               className={`id-3d-scene w-full max-w-[310px] sm:max-w-[340px] aspect-[4/5.5] ${
-                isDragging ? "cursor-grabbing" : "cursor-grab"
+                isDragging ? "cursor-grabbing touch-none select-none" : "cursor-grab touch-pan-y"
               }`}
               onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
               onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
@@ -966,6 +826,8 @@ export function Hero() {
                         <img
                           src={profileFull}
                           alt="Ronu Skariah"
+                          fetchPriority="high"
+                          decoding="async"
                           className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                         />
                         <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[9px] font-mono text-primary border border-white/10 flex items-center gap-1">
@@ -1039,7 +901,7 @@ export function Hero() {
                         className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1 cursor-pointer hover:border-primary/40 transition-colors"
                         onMouseEnter={() =>
                           runScramble(
-                            "Fintect (Dublin)",
+                            "Fintech (Dublin)",
                             setIdOrgScramble,
                             20,
                             1 / 2,

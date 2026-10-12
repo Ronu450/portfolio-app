@@ -49,7 +49,7 @@ const DEVELOPMENT_WORKS: DevelopmentWork[] = [
     title: "Core Banking Spring Boot Microservices",
     catchphrase:
       "Java 17 & Spring Boot microservices handling high-throughput transactional flows with sub-50ms latency.",
-    company: "Fintect",
+    company: "Fintech",
     role: "Software Engineer",
     date: "2024",
     category: "High-Throughput API Mesh",
@@ -58,7 +58,7 @@ const DEVELOPMENT_WORKS: DevelopmentWork[] = [
     challenge:
       "High-traffic fintech APIs required resilient scaling under sudden load bursts, token-bucket request throttling, complete historical data-change audits, and automated rolling deployments on OpenShift clusters.",
     contribution:
-      "At Fintect, I architected Java 17+ and Spring Boot REST APIs with JPA/Hibernate connection pooling, integrated Hibernate Envers historical revision stores, and standardized token-bucket rate limiting. Authored Helm charts to automate repeatable OpenShift deployments.",
+      "At Fintech, I architected Java 17+ and Spring Boot REST APIs with JPA/Hibernate connection pooling, integrated Hibernate Envers historical revision stores, and standardized token-bucket rate limiting. Authored Helm charts to automate repeatable OpenShift deployments.",
     outcome:
       "Achieved 99.99% operational SLA with immutable audit trails, guaranteed zero-downtime rolling updates, and sub-50ms P99 latency under heavy production traffic.",
     technologies: [
@@ -144,7 +144,7 @@ public class FinancialFeedEntity extends AuditableRecord {
     title: "OAuth 2.0 Security Mesh & Zero-Trust Auth",
     catchphrase:
       "End-to-end cryptographic OAuth 2.0 framework securing multi-tier React and Spring microservices.",
-    company: "Fintect",
+    company: "Fintech",
     role: "Software Engineer",
     date: "2024",
     category: "Zero-Trust Architecture",
@@ -235,7 +235,7 @@ export const useEnterpriseGrid = <T extends GridRecord>(schema: Schema<T>) => {
     title: "OpenShift Container Mesh & Helm Infrastructure",
     catchphrase:
       "Declarative Helm deployment charts and automated container topologies across OpenShift clusters.",
-    company: "Fintect",
+    company: "Fintech",
     role: "Software Engineer",
     date: "2024",
     category: "Cloud Orchestration",
@@ -283,7 +283,7 @@ spec:
     title: "Regulatory Envers Temporal Revision Ledger",
     catchphrase:
       "Historical snapshot engine capturing every database change with cryptographic author attribution.",
-    company: "Fintect",
+    company: "Fintech",
     role: "Software Engineer",
     date: "2024",
     category: "Regulatory Auditing",
@@ -481,15 +481,13 @@ export function Stories() {
 
             {/* Expressive catchphrase headline of what Ronu did */}
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif font-black tracking-tight text-foreground leading-[1.14]">
-              Engineering Resilience.
-              <br />
               <span className="text-primary italic font-serif">
                 Scaling Production Impact.
               </span>
             </h2>
 
             <p className="mx-auto max-w-lg text-xs sm:text-sm text-muted-foreground font-mono leading-relaxed">
-              High-throughput fintech microservices at Fintect • Multi-cloud automated ETL data meshes at Infosys.
+              High-throughput fintech microservices at Fintech • Multi-cloud automated ETL data meshes at Infosys.
             </p>
           </div>
         }
@@ -504,7 +502,7 @@ export function Stories() {
           <div className="flex items-center gap-4 text-[11px] font-mono text-muted-foreground/80">
             <span>8 Production Blueprints</span>
             <span>•</span>
-            <span>Fintect & Infosys</span>
+            <span>Fintech & Infosys</span>
             <span>•</span>
             <span>Java 17 • Python • React</span>
           </div>

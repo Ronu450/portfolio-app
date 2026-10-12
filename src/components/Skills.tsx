@@ -12,7 +12,7 @@ import {
   ChevronRight,
   Pause,
 } from "lucide-react";
-import { useState, useMemo, useRef, type ComponentType } from "react";
+import { useState, useMemo, useRef, useEffect, type ComponentType } from "react";
 import CircularCarousel, {
   type CircularCarouselHandle,
   type CircularCarouselItem,
@@ -371,6 +371,23 @@ export function Skills() {
   const [activeSkillIndex, setActiveSkillIndex] = useState(0);
   const [preset, setPreset] = useState<CircularCarouselPreset>("cylinder");
   const [isAutoplay, setIsAutoplay] = useState(true);
+  const [carouselCardWidth, setCarouselCardWidth] = useState(280);
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (typeof window === "undefined") return;
+      if (window.innerWidth < 480) {
+        setCarouselCardWidth(220);
+      } else if (window.innerWidth < 640) {
+        setCarouselCardWidth(250);
+      } else {
+        setCarouselCardWidth(280);
+      }
+    };
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   const carouselRef = useRef<CircularCarouselHandle | null>(null);
 
@@ -428,7 +445,7 @@ export function Skills() {
         <div className="flex flex-wrap items-center justify-between gap-4 p-2.5 rounded-2xl bg-card/75 dark:bg-[#0c1220]/80 border border-border/60 backdrop-blur-xl shadow-lg">
           {/* Preset Selector */}
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/5 dark:bg-white/5 border border-border/50 text-xs font-mono">
-            {(["cylinder", "orbit", "wheel", "panorama"] as CircularCarouselPreset[]).map((p) => (
+            {(["cylinder", "orbit", "wheel"] as CircularCarouselPreset[]).map((p) => (
               <button
                 key={p}
                 onClick={() => setPreset(p)}
@@ -519,14 +536,14 @@ export function Skills() {
         </div>
 
         {/* 3D CIRCULAR CAROUSEL STAGE */}
-        <div className="relative h-[480px] sm:h-[520px] w-full flex items-center justify-center">
+        <div className="relative h-[440px] sm:h-[520px] w-full flex items-center justify-center">
           <CircularCarousel
             ref={carouselRef}
             items={carouselItems}
             preset={preset}
-            cardWidth={280}
+            cardWidth={carouselCardWidth}
             aspectRatio={0.72}
-            gap={32}
+            gap={carouselCardWidth < 250 ? 20 : 32}
             curve={0}
             tilt={preset === "cylinder" ? -6 : undefined}
             autoplay={isAutoplay ? "drift" : "off"}
